@@ -7,6 +7,7 @@ class Profile {
   final bool useSsh;
   final String host;
   final String identityFile;
+  final bool usePort443;
 
   Profile({
     String? id,
@@ -15,6 +16,7 @@ class Profile {
     this.useSsh = false,
     this.host = '',
     this.identityFile = '',
+    this.usePort443 = false,
   }) : id = id ?? const Uuid().v4();
 
   Map<String, dynamic> toJson() {
@@ -25,6 +27,7 @@ class Profile {
       'use_ssh': useSsh,
       'host': host,
       'identity_file': identityFile,
+      'use_port_443': usePort443,
     };
   }
 
@@ -36,6 +39,7 @@ class Profile {
       useSsh: json['use_ssh'] ?? false,
       host: json['host'] ?? '',
       identityFile: json['identity_file'] ?? '',
+      usePort443: json['use_port_443'] ?? false,
     );
   }
 
@@ -45,6 +49,7 @@ class Profile {
     bool? useSsh,
     String? host,
     String? identityFile,
+    bool? usePort443,
   }) {
     return Profile(
       id: id,
@@ -53,6 +58,7 @@ class Profile {
       useSsh: useSsh ?? this.useSsh,
       host: host ?? this.host,
       identityFile: identityFile ?? this.identityFile,
+      usePort443: usePort443 ?? this.usePort443,
     );
   }
 

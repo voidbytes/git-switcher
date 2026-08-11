@@ -86,12 +86,19 @@ class SshConfigService {
     return null;
   }
 
-  Future<bool> updateSshConfig(String host, String identityFile) async {
+  Future<bool> updateSshConfig(
+    String host,
+    String identityFile, {
+    bool usePort443 = false,
+  }) async {
     await _pathService.ensureSshDirExists();
 
     final content =
         await _fileService.readFile(_pathService.sshConfigPath) ?? '';
     final lines = content.split('\n');
+
+    // 使用 443 端口时，HostName 指向 GitHub 的 ssh.github.com，Host 仍保留为别名
+    final hostName = usePort443 ? 'ssh.github.com' : host;
 
     int hostBlockStartIndex = -1;
     int hostBlockEndIndex = lines.length;
@@ -109,52 +116,16 @@ class SshConfigService {
       }
     }
 
-    if (hostBlockStartIndex != -1) {
-      int identityFileIndex = -1;
-      String indentation = '';
-
-      // 扫描整个 host 块，取首个属性行的实际缩进，并定位 IdentityFile 行
-      for (int i = hostBlockStartIndex + 1; i < hostBlockEndIndex; i++) {
-        final line = lines[i];
-        final trimmed = line.trim();
-        if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
-
-        if (indentation.isEmpty) {
-          final match = RegExp(r'^(\s+)').firstMatch(line);
-          indentation = match?.group(1) ?? '  ';
-        }
-
-        if (trimmed.startsWith('IdentityFile ')) {
-          identityFileIndex = i;
-        }
-      }
-
-      if (indentation.isEmpty) {
-        indentation = '  ';
-      }
-
-      final newIdentityLine =
-          '$indentation'
-          'IdentityFile $identityFile';
-
-      if (identityFileIndex != -1) {
-        lines[identityFileIndex] = newIdentityLine;
-      } else {
-        lines.insert(hostBlockStartIndex + 1, newIdentityLine);
-      }
-
-      return await _fileService.writeFile(
-        _pathService.sshConfigPath,
-        lines.join('\n'),
-      );
-    } else {
+    if (hostBlockStartIndex == -1) {
+      // 新建 host 块
       if (lines.isNotEmpty && lines.last.trim().isNotEmpty) {
         lines.add('');
       }
       lines.addAll([
         'Host $host',
-        '  HostName $host',
+        '  HostName $hostName',
         '  User git',
+        if (usePort443) '  Port 443',
         '  IdentityFile $identityFile',
       ]);
       return await _fileService.writeFile(
@@ -162,6 +133,61 @@ class SshConfigService {
         lines.join('\n'),
       );
     }
+
+    // 更新已有 host 块：同步 HostName / Port / IdentityFile
+    String indentation = '';
+    final directives = <String, int>{};
+    for (int i = hostBlockStartIndex + 1; i < hostBlockEndIndex; i++) {
+      final line = lines[i];
+      final trimmed = line.trim();
+      if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+
+      if (indentation.isEmpty) {
+        final match = RegExp(r'^(\s+)').firstMatch(line);
+        if (match != null) indentation = match.group(1)!;
+      }
+
+      final key = trimmed.split(RegExp(r'\s+')).first;
+      if (key == 'IdentityFile' || key == 'HostName' || key == 'Port') {
+        directives[key] = i;
+      }
+    }
+    if (indentation.isEmpty) {
+      indentation = '  ';
+    }
+
+    final desired = <String, String>{
+      'IdentityFile': identityFile,
+      'HostName': hostName,
+      if (usePort443) 'Port': '443',
+    };
+
+    // 1) 就地更新已存在的指令
+    for (final entry in desired.entries) {
+      final idx = directives[entry.key];
+      if (idx != null) {
+        lines[idx] = '$indentation${entry.key} ${entry.value}';
+      }
+    }
+
+    // 2) 未启用 443 时移除可能残留的 Port 行
+    if (!usePort443 && directives.containsKey('Port')) {
+      lines.removeAt(directives['Port']!);
+    }
+
+    // 3) 插入缺失的指令（紧随 Host 行之后）
+    final missing = desired.keys.where((k) => !directives.containsKey(k)).toList();
+    if (missing.isNotEmpty) {
+      lines.insertAll(
+        hostBlockStartIndex + 1,
+        missing.map((k) => '$indentation$k ${desired[k]}'),
+      );
+    }
+
+    return await _fileService.writeFile(
+      _pathService.sshConfigPath,
+      lines.join('\n'),
+    );
   }
 
   Future<bool> validateSshConfig(

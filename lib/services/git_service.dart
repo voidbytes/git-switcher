@@ -88,6 +88,7 @@ class GitService {
         final sshResult = await _sshService.updateSshConfig(
           profile.host,
           profile.identityFile,
+          usePort443: profile.usePort443,
         );
         results['ssh'] = sshResult;
         if (sshResult) {
