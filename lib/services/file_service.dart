@@ -184,7 +184,10 @@ class FileService {
 
     if (!Platform.isWindows) {
       try {
-        final result = await Process.run('stat', ['-c', '%a', resolvedPath]);
+        final args = Platform.isMacOS
+            ? ['-f', '%Lp', resolvedPath]
+            : ['-c', '%a', resolvedPath];
+        final result = await Process.run('stat', args);
         final permissions = result.stdout.toString().trim();
         if (permissions != '600') {
           return {
@@ -195,6 +198,11 @@ class FileService {
         }
       } catch (e) {
         debugPrint('检查文件权限失败: $e');
+        return {
+          'exists': true,
+          'permissions': false,
+          'message': '无法检查私钥权限',
+        };
       }
     }
 
