@@ -61,13 +61,11 @@ class _GitSwitcherAppState extends State<GitSwitcherApp>
     await trayManager.setIcon(iconPath);
 
     List<MenuItem> items = [
+      MenuItem(key: 'show_window', label: '显示主窗口'),
       MenuItem(key: 'about_app', label: '关于'),
       MenuItem.separator(),
       MenuItem(key: 'exit_app', label: '退出'),
     ];
-
-    await trayManager.setContextMenu(Menu(items: items));
-    trayManager.setToolTip('Git Switcher');
 
     await trayManager.setContextMenu(Menu(items: items));
     trayManager.setToolTip('Git Switcher');
