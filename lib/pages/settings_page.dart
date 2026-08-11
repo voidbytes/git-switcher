@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../models/app_config.dart';
 import '../services/config_service.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -168,7 +167,7 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => _isLoading = true);
 
     try {
-      final newConfig = AppConfig(
+      final newConfig = _configService.appConfig.copyWith(
         enableBackup: _enableBackup,
         maxBackupCount: maxBackup,
         minimizeToTray: _minimizeToTray,
