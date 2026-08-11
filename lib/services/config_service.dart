@@ -29,14 +29,21 @@ class ConfigService {
     try {
       final content = await _fileService.readFile(_pathService.configFilePath);
       if (content != null) {
-        final json = jsonDecode(content);
-
-        if (json['settings'] != null) {
-          _appConfig = AppConfig.fromJson(json['settings']);
+        final decoded = jsonDecode(content);
+        if (decoded is! Map<String, dynamic>) {
+          debugPrint('配置格式无效，已忽略');
+          return;
         }
 
-        if (json['profiles'] != null) {
-          _profiles = (json['profiles'] as List)
+        final settings = decoded['settings'];
+        if (settings is Map<String, dynamic>) {
+          _appConfig = AppConfig.fromJson(settings);
+        }
+
+        final profiles = decoded['profiles'];
+        if (profiles is List) {
+          _profiles = profiles
+              .whereType<Map<String, dynamic>>()
               .map((p) => Profile.fromJson(p))
               .toList();
         }
