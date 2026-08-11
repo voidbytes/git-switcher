@@ -143,6 +143,18 @@ class GitService {
     }
   }
 
+  Map<String, String> _parseGitUser(String content) {
+    final name = RegExp(
+      r'^\s*name\s*=\s*(.+)$',
+      multiLine: true,
+    ).firstMatch(content)?.group(1)?.trim();
+    final email = RegExp(
+      r'^\s*email\s*=\s*(.+)$',
+      multiLine: true,
+    ).firstMatch(content)?.group(1)?.trim();
+    return {'name': name ?? '', 'email': email ?? ''};
+  }
+
   Future<Profile?> findActiveProfile() async {
     final profiles = _configService.profiles;
     final currentGitConfig = await _fileService.readFile(
@@ -151,8 +163,12 @@ class GitService {
 
     if (currentGitConfig == null) return null;
 
+    final currentUser = _parseGitUser(currentGitConfig);
+
     for (final profile in profiles) {
-      if (currentGitConfig.trim() != profile.gitconfig.trim()) {
+      final profileUser = _parseGitUser(profile.gitconfig);
+      if (currentUser['name'] != profileUser['name'] ||
+          currentUser['email'] != profileUser['email']) {
         continue;
       }
 
@@ -179,10 +195,16 @@ class GitService {
     final currentGitConfig = await _fileService.readFile(
       _pathService.gitConfigPath,
     );
-    if (currentGitConfig != null &&
-        currentGitConfig.trim() == profile.gitconfig.trim()) {
-      results['git'] = true;
-      messages.add('Git配置一致');
+    if (currentGitConfig != null) {
+      final currentUser = _parseGitUser(currentGitConfig);
+      final profileUser = _parseGitUser(profile.gitconfig);
+      if (currentUser['name'] == profileUser['name'] &&
+          currentUser['email'] == profileUser['email']) {
+        results['git'] = true;
+        messages.add('Git配置一致');
+      } else {
+        messages.add('Git配置不一致');
+      }
     } else {
       messages.add('Git配置不一致');
     }
