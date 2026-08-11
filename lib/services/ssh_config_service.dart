@@ -89,7 +89,7 @@ class SshConfigService {
   Future<bool> updateSshConfig(
     String host,
     String identityFile, {
-    bool usePort443 = false,
+    int? sshPort,
   }) async {
     await _pathService.ensureSshDirExists();
 
@@ -97,8 +97,8 @@ class SshConfigService {
         await _fileService.readFile(_pathService.sshConfigPath) ?? '';
     final lines = content.split('\n');
 
-    // 使用 443 端口时，HostName 指向 GitHub 的 ssh.github.com，Host 仍保留为别名
-    final hostName = usePort443 ? 'ssh.github.com' : host;
+    // 配置了自定义端口时，HostName 指向 GitHub 的 ssh.github.com，Host 仍保留为别名
+    final hostName = sshPort != null ? 'ssh.github.com' : host;
 
     int hostBlockStartIndex = -1;
     int hostBlockEndIndex = lines.length;
@@ -125,7 +125,7 @@ class SshConfigService {
         'Host $host',
         '  HostName $hostName',
         '  User git',
-        if (usePort443) '  Port 443',
+        if (sshPort != null) '  Port $sshPort',
         '  IdentityFile $identityFile',
       ]);
       return await _fileService.writeFile(
@@ -159,7 +159,7 @@ class SshConfigService {
     final desired = <String, String>{
       'IdentityFile': identityFile,
       'HostName': hostName,
-      if (usePort443) 'Port': '443',
+      if (sshPort != null) 'Port': '$sshPort',
     };
 
     // 1) 就地更新已存在的指令
@@ -170,8 +170,8 @@ class SshConfigService {
       }
     }
 
-    // 2) 未启用 443 时移除可能残留的 Port 行
-    if (!usePort443 && directives.containsKey('Port')) {
+    // 2) 未配置端口时移除可能残留的 Port 行
+    if (sshPort == null && directives.containsKey('Port')) {
       lines.removeAt(directives['Port']!);
     }
 

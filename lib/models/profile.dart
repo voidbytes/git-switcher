@@ -7,7 +7,7 @@ class Profile {
   final bool useSsh;
   final String host;
   final String identityFile;
-  final bool usePort443;
+  final int? sshPort;
 
   Profile({
     String? id,
@@ -16,7 +16,7 @@ class Profile {
     this.useSsh = false,
     this.host = '',
     this.identityFile = '',
-    this.usePort443 = false,
+    this.sshPort,
   }) : id = id ?? const Uuid().v4();
 
   Map<String, dynamic> toJson() {
@@ -27,7 +27,7 @@ class Profile {
       'use_ssh': useSsh,
       'host': host,
       'identity_file': identityFile,
-      'use_port_443': usePort443,
+      'ssh_port': sshPort,
     };
   }
 
@@ -39,7 +39,9 @@ class Profile {
       useSsh: json['use_ssh'] ?? false,
       host: json['host'] ?? '',
       identityFile: json['identity_file'] ?? '',
-      usePort443: json['use_port_443'] ?? false,
+      // 兼容旧版本的 use_port_443 布尔字段
+      sshPort: json['ssh_port'] ??
+          (json['use_port_443'] == true ? 443 : null),
     );
   }
 
@@ -49,7 +51,7 @@ class Profile {
     bool? useSsh,
     String? host,
     String? identityFile,
-    bool? usePort443,
+    int? sshPort,
   }) {
     return Profile(
       id: id,
@@ -58,7 +60,7 @@ class Profile {
       useSsh: useSsh ?? this.useSsh,
       host: host ?? this.host,
       identityFile: identityFile ?? this.identityFile,
-      usePort443: usePort443 ?? this.usePort443,
+      sshPort: sshPort ?? this.sshPort,
     );
   }
 
