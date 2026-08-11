@@ -111,23 +111,26 @@ class SshConfigService {
 
     if (hostBlockStartIndex != -1) {
       int identityFileIndex = -1;
-      String indentation = '  ';
+      String indentation = '';
 
+      // 扫描整个 host 块，取首个属性行的实际缩进，并定位 IdentityFile 行
       for (int i = hostBlockStartIndex + 1; i < hostBlockEndIndex; i++) {
         final line = lines[i];
         final trimmed = line.trim();
         if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
 
-        final match = RegExp(r'^(\s+)').firstMatch(line);
-        if (match != null) {
-          indentation = match.group(1)!;
+        if (indentation.isEmpty) {
+          final match = RegExp(r'^(\s+)').firstMatch(line);
+          indentation = match?.group(1) ?? '  ';
         }
 
         if (trimmed.startsWith('IdentityFile ')) {
           identityFileIndex = i;
         }
+      }
 
-        if (indentation != '  ') break;
+      if (indentation.isEmpty) {
+        indentation = '  ';
       }
 
       final newIdentityLine =
