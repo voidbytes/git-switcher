@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
 import '../services/config_service.dart';
 import '../services/git_service.dart';
@@ -41,8 +42,12 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('切换失败: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(l10n.switchFailedWithError(e.toString())),
+            backgroundColor: Colors.red,
+          ),
         );
       }
       debugPrintStack();
@@ -55,6 +60,7 @@ class _HomePageState extends State<HomePage> {
 
   void _switchProfile(Profile profile) async {
     setState(() => _isLoading = true);
+    final l10n = AppLocalizations.of(context);
 
     try {
       if (profile.useSsh) {
@@ -67,20 +73,24 @@ class _HomePageState extends State<HomePage> {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('SSH 配置冲突'),
+              title: Text(l10n.sshConfigConflictTitle),
               content: Text(
-                '检测到当前系统中针对主机 "${profile.host}" 的 SSH 私钥路径为:\n\n$conflictPath\n\n您希望将其更改为:\n\n${profile.identityFile}\n\n是否继续？',
+                l10n.sshConfigConflictContent(
+                  profile.host,
+                  conflictPath,
+                  profile.identityFile,
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('取消'),
+                  child: Text(l10n.cancel),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text(
-                    '继续切换',
-                    style: TextStyle(color: Colors.orange),
+                  child: Text(
+                    l10n.continueSwitch,
+                    style: const TextStyle(color: Colors.orange),
                   ),
                 ),
               ],
@@ -106,7 +116,11 @@ class _HomePageState extends State<HomePage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? '切换成功' : '切换失败\n${messages.join('\n')}'),
+            content: Text(
+              success
+                  ? l10n.switchSuccess
+                  : l10n.switchFailedWithMessages(messages.join('\n')),
+            ),
             backgroundColor: success ? Colors.green : Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -115,7 +129,10 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('切换失败: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(l10n.switchFailedWithError(e.toString())),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -125,15 +142,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Git账号切换器'),
+        title: Text(l10n.appTitle),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _checkActiveProfile,
-            tooltip: '刷新当前配置状态',
+            tooltip: l10n.refreshTooltip,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
@@ -169,6 +187,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildActiveProfileCard() {
+    final l10n = AppLocalizations.of(context);
     final Color cardColor;
     final IconData icon;
     final String title;
@@ -178,14 +197,14 @@ class _HomePageState extends State<HomePage> {
     if (_activeProfile != null) {
       cardColor = Colors.green.shade100;
       icon = Icons.check_circle;
-      title = '当前激活: ${_activeProfile!.name}';
-      subtitle = '系统配置与所选配置一致';
+      title = l10n.activeProfileTitle(_activeProfile!.name);
+      subtitle = l10n.activeProfileSubtitle;
       configMatched = true;
     } else {
       cardColor = Colors.orange.shade100;
       icon = Icons.warning;
-      title = '配置不一致提醒';
-      subtitle = '当前系统配置与本软件中的配置不匹配，建议先备份当前配置并查看差异。';
+      title = l10n.configMismatchTitle;
+      subtitle = l10n.configMismatchSubtitle;
       configMatched = false;
     }
 
@@ -226,13 +245,13 @@ class _HomePageState extends State<HomePage> {
                   OutlinedButton.icon(
                     onPressed: _backupCurrentConfig,
                     icon: const Icon(Icons.backup, size: 18),
-                    label: const Text('备份当前配置'),
+                    label: Text(l10n.backupCurrentConfig),
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
                     onPressed: _showConfigDiff,
                     icon: const Icon(Icons.difference, size: 18),
-                    label: const Text('查看差异'),
+                    label: Text(l10n.viewDiff),
                   ),
                 ],
               ),
@@ -257,12 +276,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _showConfigDiff() async {
+    final l10n = AppLocalizations.of(context);
     final profiles = _configService.profiles;
     if (profiles.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('暂无配置可对比'),
+          SnackBar(
+            content: Text(l10n.noConfigsToCompare),
             backgroundColor: Colors.orange,
           ),
         );
@@ -283,7 +303,7 @@ class _HomePageState extends State<HomePage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('查看配置差异'),
+        title: Text(l10n.viewConfigDiffTitle),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView(
@@ -305,7 +325,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 subtitle: Text(
                   differences.isEmpty
-                      ? '与当前配置一致'
+                      ? l10n.configMatches
                       : differences.join('\n'),
                   style: const TextStyle(fontSize: 12),
                 ),
@@ -317,7 +337,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('关闭'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -325,6 +345,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _showProfileDiffDetail(Profile profile) async {
+    final l10n = AppLocalizations.of(context);
     final result = await _gitService.getConfigDiff(profile);
     final differences = (result['differences'] as List).cast<String>();
     final currentGitConfig = result['currentGitConfig'] as String?;
@@ -335,7 +356,7 @@ class _HomePageState extends State<HomePage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('${profile.name} 配置差异'),
+        title: Text(l10n.profileDiffTitle(profile.name)),
         content: SizedBox(
           width: double.maxFinite,
           height: 400,
@@ -344,14 +365,14 @@ class _HomePageState extends State<HomePage> {
             child: differences.isEmpty
                 ? Column(
                     children: [
-                      const Text(
-                        '该配置与当前配置一致',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Text(
+                        l10n.configMatchesFull,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Expanded(
                         child: _buildConfigContentView(
-                          profileGitConfig ?? '（无目标配置）',
+                          profileGitConfig ?? l10n.noTargetConfig,
                         ),
                       ),
                     ],
@@ -363,9 +384,9 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                '差异项:',
-                                style: TextStyle(
+                              Text(
+                                l10n.diffItems,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -387,17 +408,20 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const TabBar(
-                        tabs: [Tab(text: '当前配置'), Tab(text: '目标配置')],
+                      TabBar(
+                        tabs: [
+                          Tab(text: l10n.currentConfigTab),
+                          Tab(text: l10n.targetConfigTab),
+                        ],
                       ),
                       Expanded(
                         child: TabBarView(
                           children: [
                             _buildConfigContentView(
-                              currentGitConfig ?? '（无当前Git配置）',
+                              currentGitConfig ?? l10n.noCurrentGitConfig,
                             ),
                             _buildConfigContentView(
-                              profileGitConfig ?? '（无目标配置）',
+                              profileGitConfig ?? l10n.noTargetConfig,
                             ),
                           ],
                         ),
@@ -409,7 +433,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('关闭'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -434,17 +458,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildProfileList() {
+    final l10n = AppLocalizations.of(context);
     final profiles = _configService.profiles;
 
     if (profiles.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.person_outline, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('暂无配置', style: TextStyle(fontSize: 18, color: Colors.grey)),
-            Text('点击右下角按钮创建第一个配置'),
+            const Icon(Icons.person_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              l10n.noProfiles,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            Text(l10n.clickToCreateProfile),
           ],
         ),
       );
@@ -469,8 +497,13 @@ class _HomePageState extends State<HomePage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (profile.host.isNotEmpty) Text('平台: ${profile.host}'),
-                Text('SSH: ${profile.useSsh ? '启用' : '禁用'}'),
+                if (profile.host.isNotEmpty)
+                  Text(l10n.platformLabel(profile.host)),
+                Text(
+                  profile.useSsh
+                      ? l10n.sshEnabledStatus
+                      : l10n.sshDisabledStatus,
+                ),
               ],
             ),
             trailing: Row(
@@ -521,19 +554,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _deleteProfile(Profile profile) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除配置 "${profile.name}" 吗？'),
+        title: Text(l10n.confirmDeleteTitle),
+        content: Text(l10n.confirmDeleteContent(profile.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -544,7 +578,7 @@ class _HomePageState extends State<HomePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? '删除成功' : '删除失败'),
+            content: Text(success ? l10n.deleteSuccess : l10n.deleteFailed),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
         );

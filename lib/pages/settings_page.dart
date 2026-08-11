@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/localization_service.dart';
 import '../services/config_service.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -16,6 +18,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _enableBackup = true;
   bool _isLoading = false;
   bool _minimizeToTray = false;
+  String _languageCode = 'system';
 
   @override
   void initState() {
@@ -24,6 +27,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _enableBackup = config.enableBackup;
     _maxBackupController.text = config.maxBackupCount.toString();
     _minimizeToTray = config.minimizeToTray;
+    _languageCode = config.languageCode ?? 'system';
   }
 
   @override
@@ -32,20 +36,50 @@ class _SettingsPageState extends State<SettingsPage> {
     super.dispose();
   }
 
+  String _langLabel(AppLocalizations l10n, String code) {
+    switch (code) {
+      case 'system':
+        return l10n.languageSystem;
+      case 'zh':
+        return l10n.langZhSimplified;
+      case 'zh_Hant':
+        return l10n.langZhTraditional;
+      case 'en':
+        return l10n.langEnglish;
+      case 'fr':
+        return l10n.langFrench;
+      case 'de':
+        return l10n.langGerman;
+      case 'es':
+        return l10n.langSpanish;
+      case 'ja':
+        return l10n.langJapanese;
+      case 'ko':
+        return l10n.langKorean;
+      case 'ru':
+        return l10n.langRussian;
+      case 'pt':
+        return l10n.langPortuguese;
+      default:
+        return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('设置'),
+        title: Text(l10n.settingsTitle),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _buildSettings(),
+          : _buildSettings(l10n),
     );
   }
 
-  Widget _buildSettings() {
+  Widget _buildSettings(AppLocalizations l10n) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -57,17 +91,41 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '通用设置',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.generalSettings,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: const Text('最小化到托盘'),
-                    subtitle: const Text('关闭窗口时，最小化到系统托盘而非退出应用'),
+                    title: Text(l10n.minimizeToTray),
+                    subtitle: Text(l10n.minimizeToTraySubtitle),
                     value: _minimizeToTray,
                     onChanged: (value) {
                       setState(() => _minimizeToTray = value);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    initialValue: _languageCode,
+                    decoration: InputDecoration(
+                      labelText: l10n.language,
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: kSupportedLanguageCodes
+                        .map(
+                          (code) => DropdownMenuItem(
+                            value: code,
+                            child: Text(_langLabel(l10n, code)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _languageCode = value);
+                      }
                     },
                   ),
                 ],
@@ -81,15 +139,18 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '备份设置',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.backupSettings,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
                   SwitchListTile(
-                    title: const Text('启用自动备份'),
-                    subtitle: const Text('切换配置时自动备份当前配置'),
+                    title: Text(l10n.enableAutoBackup),
+                    subtitle: Text(l10n.enableAutoBackupSubtitle),
                     value: _enableBackup,
                     onChanged: (value) {
                       setState(() => _enableBackup = value);
@@ -100,20 +161,20 @@ class _SettingsPageState extends State<SettingsPage> {
 
                   TextFormField(
                     controller: _maxBackupController,
-                    decoration: const InputDecoration(
-                      labelText: '最大备份数量',
-                      border: OutlineInputBorder(),
-                      helperText: '超出此数量将自动删除最旧的备份 (1-50)',
+                    decoration: InputDecoration(
+                      labelText: l10n.maxBackupCount,
+                      border: const OutlineInputBorder(),
+                      helperText: l10n.maxBackupCountHelper,
                     ),
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return '请输入备份数量';
+                        return l10n.enterBackupCount;
                       }
                       final num = int.tryParse(value);
                       if (num == null || num < 1 || num > 50) {
-                        return '请输入1-50之间的数字';
+                        return l10n.backupCountRange;
                       }
                       return null;
                     },
@@ -130,14 +191,14 @@ class _SettingsPageState extends State<SettingsPage> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('取消'),
+                  child: Text(l10n.cancel),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
                   onPressed: _saveSettings,
-                  child: const Text('保存'),
+                  child: Text(l10n.save),
                 ),
               ),
             ],
@@ -148,11 +209,12 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _saveSettings() async {
+    final l10n = AppLocalizations.of(context);
     final maxBackupText = _maxBackupController.text.trim();
     if (maxBackupText.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('请输入最大备份数量')));
+      ).showSnackBar(SnackBar(content: Text(l10n.enterMaxBackupCount)));
       return;
     }
 
@@ -160,7 +222,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (maxBackup == null || maxBackup < 1 || maxBackup > 50) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('最大备份数量必须在1-50之间')));
+      ).showSnackBar(SnackBar(content: Text(l10n.maxBackupCountRange)));
       return;
     }
 
@@ -171,14 +233,16 @@ class _SettingsPageState extends State<SettingsPage> {
         enableBackup: _enableBackup,
         maxBackupCount: maxBackup,
         minimizeToTray: _minimizeToTray,
+        languageCode: _languageCode == 'system' ? null : _languageCode,
       );
 
       final success = await _configService.updateAppConfig(newConfig);
+      applyLocale(newConfig.languageCode);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? '设置已保存' : '保存失败'),
+            content: Text(success ? l10n.settingsSaved : l10n.saveFailed),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
         );
@@ -191,7 +255,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('保存失败: $e')));
+        ).showSnackBar(SnackBar(content: Text(l10n.saveFailedWithError(e.toString()))));
       }
     } finally {
       setState(() => _isLoading = false);

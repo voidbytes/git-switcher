@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
 import '../services/config_service.dart';
 import '../services/file_service.dart';
@@ -54,18 +55,19 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.profile == null ? '新建配置' : '修改配置'),
+        title: Text(widget.profile == null ? l10n.newProfile : l10n.editProfile),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _buildForm(),
+          : _buildForm(l10n),
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildForm(AppLocalizations l10n) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -75,14 +77,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           children: [
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: '配置名称',
-                border: OutlineInputBorder(),
-                helperText: '例如：工作账号、个人账号',
+              decoration: InputDecoration(
+                labelText: l10n.configName,
+                border: const OutlineInputBorder(),
+                helperText: l10n.configNameHelper,
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return '请输入配置名称';
+                  return l10n.enterConfigName;
                 }
                 return null;
               },
@@ -90,34 +92,37 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             const SizedBox(height: 16),
             Row(
               children: [
-                const Expanded(
-                  child: Text('Git 配置内容', style: TextStyle(fontSize: 16)),
+                Expanded(
+                  child: Text(
+                    l10n.gitConfigContent,
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
                 TextButton.icon(
                   icon: const Icon(Icons.download),
-                  label: const Text('导入现有配置'),
+                  label: Text(l10n.importExistingConfig),
                   onPressed: _importGitConfig,
                 ),
               ],
             ),
             TextFormField(
               controller: _gitconfigController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                helperText: '粘贴 .gitconfig 内容或配置片段',
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                helperText: l10n.gitconfigHelper,
               ),
               maxLines: 8,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return '请输入Git配置内容';
+                  return l10n.enterGitConfig;
                 }
                 return null;
               },
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('启用 SSH'),
-              subtitle: const Text('为此配置启用SSH密钥认证'),
+              title: Text(l10n.enableSsh),
+              subtitle: Text(l10n.enableSshSubtitle),
               value: _useSsh,
               onChanged: (value) {
                 setState(() => _useSsh = value);
@@ -127,15 +132,15 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _hostController,
-                decoration: const InputDecoration(
-                  labelText: '主机名',
-                  border: OutlineInputBorder(),
-                  helperText: '例如：github.com, gitlab.com',
+                decoration: InputDecoration(
+                  labelText: l10n.hostname,
+                  border: const OutlineInputBorder(),
+                  helperText: l10n.hostnameHelper,
                 ),
                 validator: _useSsh
                     ? (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return '启用SSH时必须指定主机名';
+                          return l10n.hostnameRequired;
                         }
                         return null;
                       }
@@ -145,10 +150,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               TextFormField(
                 controller: _sshPortController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'SSH 端口',
-                  border: OutlineInputBorder(),
-                  helperText: '默认 443，留空则使用默认端口 22',
+                decoration: InputDecoration(
+                  labelText: l10n.sshPort,
+                  border: const OutlineInputBorder(),
+                  helperText: l10n.sshPortHelper,
                 ),
                 validator: _useSsh
                     ? (value) {
@@ -157,7 +162,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                         }
                         final port = int.tryParse(value.trim());
                         if (port == null || port < 1 || port > 65535) {
-                          return '请输入 1-65535 之间的端口号';
+                          return l10n.portRange;
                         }
                         return null;
                       }
@@ -169,15 +174,15 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                   Expanded(
                     child: TextFormField(
                       controller: _identityFileController,
-                      decoration: const InputDecoration(
-                        labelText: 'SSH 私钥路径',
-                        border: OutlineInputBorder(),
-                        helperText: '例如：~/.ssh/id_rsa_work',
+                      decoration: InputDecoration(
+                        labelText: l10n.sshPrivateKeyPath,
+                        border: const OutlineInputBorder(),
+                        helperText: l10n.privateKeyHelper,
                       ),
                       validator: _useSsh
                           ? (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return '启用SSH时必须指定私钥路径';
+                                return l10n.privateKeyRequired;
                               }
                               return null;
                             }
@@ -188,7 +193,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                   IconButton(
                     icon: const Icon(Icons.folder_open),
                     onPressed: _pickPrivateKeyFile,
-                    tooltip: '选择私钥文件',
+                    tooltip: l10n.pickPrivateKeyTooltip,
                   ),
                 ],
               ),
@@ -199,14 +204,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
+                    child: Text(l10n.cancel),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _saveProfile,
-                    child: const Text('保存'),
+                    child: Text(l10n.save),
                   ),
                 ),
               ],
@@ -218,14 +223,15 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   }
 
   void _importGitConfig() async {
+    final l10n = AppLocalizations.of(context);
     final gitConfigPath = PathService.instance.gitConfigPath;
     final content = await FileService.instance.readFile(gitConfigPath);
     if (content != null) {
       _gitconfigController.text = content;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('成功导入当前 .gitconfig 配置'),
+          SnackBar(
+            content: Text(l10n.importGitConfigSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -233,8 +239,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('未找到 .gitconfig 文件或读取失败'),
+          SnackBar(
+            content: Text(l10n.importGitConfigFailed),
             backgroundColor: Colors.red,
           ),
         );
@@ -243,6 +249,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   }
 
   void _pickPrivateKeyFile() async {
+    final l10n = AppLocalizations.of(context);
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.any,
@@ -260,12 +267,13 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('选择文件失败: $e')));
+        ).showSnackBar(SnackBar(content: Text(l10n.pickFileFailed(e.toString()))));
       }
     }
   }
 
   void _saveProfile() async {
+    final l10n = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -295,7 +303,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? '保存成功' : '保存失败'),
+            content: Text(success ? l10n.saveSuccess : l10n.saveFailed),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
         );
@@ -305,7 +313,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         }
       }
     } catch (e) {
-      _showErrorSnackBar('保存失败: $e');
+      _showErrorSnackBar(l10n.saveFailedWithError(e.toString()));
     } finally {
       setState(() => _isLoading = false);
     }

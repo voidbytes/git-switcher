@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
+import 'l10n/app_localizations.dart';
+import 'l10n/localization_service.dart';
 import 'pages/home_page.dart';
 import 'services/config_service.dart';
 
@@ -41,6 +43,8 @@ class _GitSwitcherAppState extends State<GitSwitcherApp>
   @override
   void initState() {
     super.initState();
+    // 以持久化语言初始化全局本地化实例，保证托盘菜单等服务可见文案正确。
+    applyLocale(ConfigService.instance.appConfig.languageCode);
     windowManager.addListener(this);
     trayManager.addListener(this);
     windowManager.setPreventClose(true);
@@ -61,10 +65,10 @@ class _GitSwitcherAppState extends State<GitSwitcherApp>
     await trayManager.setIcon(iconPath);
 
     List<MenuItem> items = [
-      MenuItem(key: 'show_window', label: '显示主窗口'),
-      MenuItem(key: 'about_app', label: '关于'),
+      MenuItem(key: 'show_window', label: L.of.trayShowWindow),
+      MenuItem(key: 'about_app', label: L.of.trayAbout),
       MenuItem.separator(),
-      MenuItem(key: 'exit_app', label: '退出'),
+      MenuItem(key: 'exit_app', label: L.of.trayExit),
     ];
 
     await trayManager.setContextMenu(Menu(items: items));
@@ -75,19 +79,20 @@ class _GitSwitcherAppState extends State<GitSwitcherApp>
     final context = navigatorKey.currentContext;
     if (context == null) return;
 
+    final l10n = AppLocalizations.of(context);
     final uriGithub = Uri.parse('https://github.com/voidbytes/git-switcher');
     final uriHomepage = Uri.parse('http://voidbytes.com/');
 
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('关于 Git Switcher'),
+        title: Text(l10n.aboutTitle),
         content: RichText(
           text: TextSpan(
             style: Theme.of(context).textTheme.bodyMedium,
             children: [
-              const TextSpan(text: '作者: voidbytes\n'),
-              const TextSpan(text: '作者主页:'),
+              TextSpan(text: '${l10n.aboutAuthor}\n'),
+              TextSpan(text: l10n.aboutAuthorHomepage),
               TextSpan(
                 text: 'https://voidbytes.com\n',
                 style: const TextStyle(
@@ -99,7 +104,7 @@ class _GitSwitcherAppState extends State<GitSwitcherApp>
                     launchUrl(uriHomepage);
                   },
               ),
-              const TextSpan(text: '项目地址:'),
+              TextSpan(text: l10n.aboutProjectUrl),
               TextSpan(
                 text: 'https://github.com/voidbytes/git-switcher',
                 style: const TextStyle(
@@ -117,7 +122,7 @@ class _GitSwitcherAppState extends State<GitSwitcherApp>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('关闭'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -126,21 +131,30 @@ class _GitSwitcherAppState extends State<GitSwitcherApp>
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'Git账号切换器',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.comfortable,
-        fontFamily: "AlibabaPuHuiTi",
-        fontFamilyFallback: ["AlibabaPuHuiTi"],
-        colorScheme: ColorScheme.fromSeed(
-          brightness: Brightness.light,
-          seedColor: Colors.lightBlueAccent,
-        ),
-        useMaterial3: true,
-      ),
-      home: const HomePage(),
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: localeNotifier,
+      builder: (context, locale, _) {
+        return MaterialApp(
+          navigatorKey: navigatorKey,
+          onGenerateTitle: (context) =>
+              AppLocalizations.of(context).appTitle,
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            visualDensity: VisualDensity.comfortable,
+            fontFamily: "AlibabaPuHuiTi",
+            fontFamilyFallback: ["AlibabaPuHuiTi"],
+            colorScheme: ColorScheme.fromSeed(
+              brightness: Brightness.light,
+              seedColor: Colors.lightBlueAccent,
+            ),
+            useMaterial3: true,
+          ),
+          home: const HomePage(),
+        );
+      },
     );
   }
 

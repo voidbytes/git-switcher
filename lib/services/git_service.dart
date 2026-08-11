@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import '../l10n/localization_service.dart';
 import '../models/profile.dart';
 import '../services/file_service.dart';
 import '../services/path_service.dart';
@@ -45,7 +46,7 @@ class GitService {
           'gitconfig',
         );
         if (gitBackup != null) {
-          messages.add('已备份当前Git配置');
+          messages.add(L.of.gitBackupDone);
         }
 
         if (profile.useSsh) {
@@ -55,7 +56,7 @@ class GitService {
             'config',
           );
           if (sshBackup != null) {
-            messages.add('已备份当前SSH配置');
+            messages.add(L.of.sshBackupDone);
           }
         }
 
@@ -77,9 +78,9 @@ class GitService {
       );
       results['git'] = gitResult;
       if (gitResult) {
-        messages.add('Git配置已更新');
+        messages.add(L.of.gitConfigUpdated);
       } else {
-        messages.add('Git配置更新失败');
+        messages.add(L.of.gitConfigUpdateFailed);
       }
 
       if (profile.useSsh &&
@@ -92,9 +93,9 @@ class GitService {
         );
         results['ssh'] = sshResult;
         if (sshResult) {
-          messages.add('SSH配置已更新');
+          messages.add(L.of.sshConfigUpdated);
         } else {
-          messages.add('SSH配置更新失败');
+          messages.add(L.of.sshConfigUpdateFailed);
         }
       } else {
         results['ssh'] = true;
@@ -116,11 +117,11 @@ class GitService {
             previousSshConfig,
           );
         }
-        messages.add('已回滚配置');
+        messages.add(L.of.configRolledBack);
         await _configService.updateActiveProfileId(null);
       }
     } catch (e) {
-      messages.add('切换失败: $e');
+      messages.add(L.of.switchFailedWithError(e.toString()));
       await _configService.updateActiveProfileId(null);
     }
 
@@ -203,12 +204,12 @@ class GitService {
       if (currentUser['name'] == profileUser['name'] &&
           currentUser['email'] == profileUser['email']) {
         results['git'] = true;
-        messages.add('Git配置一致');
+        messages.add(L.of.gitConfigMatches);
       } else {
-        messages.add('Git配置不一致');
+        messages.add(L.of.gitConfigMismatch);
       }
     } else {
-      messages.add('Git配置不一致');
+      messages.add(L.of.gitConfigMismatch);
     }
 
     if (profile.useSsh) {
@@ -218,9 +219,9 @@ class GitService {
       );
       results['ssh'] = isValid;
       if (isValid) {
-        messages.add('SSH配置一致');
+        messages.add(L.of.sshConfigMatches);
       } else {
-        messages.add('SSH配置不一致');
+        messages.add(L.of.sshConfigMismatch);
       }
 
       final keyCheck = await _fileService.checkSshKeyFile(profile.identityFile);
@@ -256,12 +257,12 @@ class GitService {
 
     if (currentName != profileUser['name']) {
       differences.add(
-        'Git user.name: 当前 "${currentName ?? '(无)'}" ≠ 配置 "${profileUser['name']}"',
+        L.of.diffUserName(currentName ?? '(无)', profileUser['name'] ?? ''),
       );
     }
     if (currentEmail != profileUser['email']) {
       differences.add(
-        'Git user.email: 当前 "${currentEmail ?? '(无)'}" ≠ 配置 "${profileUser['email']}"',
+        L.of.diffUserEmail(currentEmail ?? '(无)', profileUser['email'] ?? ''),
       );
     }
 
@@ -271,10 +272,10 @@ class GitService {
       final profileIdentityFile = profile.identityFile;
       final expected = _pathService.resolvePath(profileIdentityFile);
       if (currentIdentityFile == null) {
-        differences.add('SSH: 未找到主机 "${profile.host}" 的配置');
+        differences.add(L.of.diffSshHostNotFound(profile.host));
       } else if (p.normalize(currentIdentityFile) != p.normalize(expected)) {
         differences.add(
-          'SSH IdentityFile: 当前 "$currentIdentityFile" ≠ 配置 "$profileIdentityFile"',
+          L.of.diffSshIdentityFile(currentIdentityFile, profileIdentityFile),
         );
       }
     }
@@ -295,7 +296,7 @@ class GitService {
       'gitconfig',
     );
     if (gitBackup != null) {
-      messages.add('已备份当前Git配置');
+      messages.add(L.of.gitBackupDone);
     }
 
     final sshConfigExists =
@@ -307,12 +308,12 @@ class GitService {
         'config',
       );
       if (sshBackup != null) {
-        messages.add('已备份当前SSH配置');
+        messages.add(L.of.sshBackupDone);
       }
     }
 
     if (messages.isEmpty) {
-      messages.add('没有可备份的配置');
+      messages.add(L.of.backupNothing);
     }
     return messages;
   }

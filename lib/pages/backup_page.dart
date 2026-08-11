@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/backup_item.dart';
 import '../services/file_service.dart';
 
@@ -30,9 +31,10 @@ class _BackupPageState extends State<BackupPage> {
       });
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('加载备份列表失败: $e')));
+        ).showSnackBar(SnackBar(content: Text(l10n.loadBackupsFailed(e.toString()))));
       }
     } finally {
       setState(() => _isLoading = false);
@@ -41,9 +43,10 @@ class _BackupPageState extends State<BackupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('备份管理'),
+        title: Text(l10n.backupManagement),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadBackups),
@@ -51,28 +54,31 @@ class _BackupPageState extends State<BackupPage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _buildBackupList(),
+          : _buildBackupList(l10n),
       bottomNavigationBar: _selectedBackup != null
           ? Container(
               padding: const EdgeInsets.all(16),
               child: ElevatedButton(
                 onPressed: _restoreBackup,
-                child: const Text('恢复选中的备份'),
+                child: Text(l10n.restoreSelectedBackup),
               ),
             )
           : null,
     );
   }
 
-  Widget _buildBackupList() {
+  Widget _buildBackupList(AppLocalizations l10n) {
     if (_backupItems.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.backup_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('暂无备份', style: TextStyle(fontSize: 18, color: Colors.grey)),
+            const Icon(Icons.backup_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              l10n.noBackups,
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
           ],
         ),
       );
@@ -106,8 +112,8 @@ class _BackupPageState extends State<BackupPage> {
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: ExpansionTile(
-            title: Text('备份时间: $date'),
-            subtitle: Text('${backups.length} 个文件'),
+            title: Text(l10n.backupTime(date)),
+            subtitle: Text(l10n.fileCount(backups.length)),
             children: [
               RadioGroup<BackupItem>(
                 groupValue: _selectedBackup,
@@ -121,7 +127,9 @@ class _BackupPageState extends State<BackupPage> {
                           value: backup,
 
                           title: Text(
-                            backup.type == 'git' ? 'Git 配置' : 'SSH 配置',
+                            backup.type == 'git'
+                                ? l10n.gitConfigType
+                                : l10n.sshConfigType,
                           ),
                           subtitle: Text(backup.filename),
                           secondary: IconButton(
@@ -141,16 +149,21 @@ class _BackupPageState extends State<BackupPage> {
   }
 
   void _previewBackup(BackupItem backup) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('${backup.type.toUpperCase()} 备份预览'),
+        title: Text(
+          l10n.backupPreviewTitle(
+            backup.type == 'git' ? 'Git' : 'SSH',
+          ),
+        ),
         content: SizedBox(
           width: double.maxFinite,
           height: 400,
           child: SingleChildScrollView(
             child: Text(
-              backup.content ?? '无内容',
+              backup.content ?? l10n.noContent,
               style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
             ),
           ),
@@ -158,7 +171,7 @@ class _BackupPageState extends State<BackupPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('关闭'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -166,24 +179,26 @@ class _BackupPageState extends State<BackupPage> {
   }
 
   void _restoreBackup() async {
+    final l10n = AppLocalizations.of(context);
     if (_selectedBackup == null) return;
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认恢复'),
+        title: Text(l10n.confirmRestore),
         content: Text(
-          '确定要恢复选中的${_selectedBackup!.type == 'git' ? 'Git' : 'SSH'}配置吗？\n\n'
-          '这将覆盖当前配置。',
+          l10n.confirmRestoreContent(
+            _selectedBackup!.type == 'git' ? 'Git' : 'SSH',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('恢复', style: TextStyle(color: Colors.orange)),
+            child: Text(l10n.restore, style: const TextStyle(color: Colors.orange)),
           ),
         ],
       ),
@@ -198,7 +213,7 @@ class _BackupPageState extends State<BackupPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(success ? '恢复成功' : '恢复失败'),
+              content: Text(success ? l10n.restoreSuccess : l10n.restoreFailed),
               backgroundColor: success ? Colors.green : Colors.red,
             ),
           );
@@ -207,7 +222,7 @@ class _BackupPageState extends State<BackupPage> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('恢复失败: $e')));
+          ).showSnackBar(SnackBar(content: Text(l10n.restoreFailedWithError(e.toString()))));
         }
       } finally {
         setState(() => _isLoading = false);

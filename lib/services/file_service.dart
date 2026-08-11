@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import '../l10n/localization_service.dart';
 import '../models/backup_item.dart';
 import 'path_service.dart';
 
@@ -179,7 +180,7 @@ class FileService {
     final file = File(resolvedPath);
 
     if (!await file.exists()) {
-      return {'exists': false, 'message': '私钥文件不存在: $resolvedPath'};
+      return {'exists': false, 'message': L.of.keyFileNotExist(resolvedPath)};
     }
 
     if (!Platform.isWindows) {
@@ -193,7 +194,7 @@ class FileService {
           return {
             'exists': true,
             'permissions': false,
-            'message': '私钥权限不正确，应为600，当前为$permissions',
+            'message': L.of.keyPermissionIncorrect(permissions),
           };
         }
       } catch (e) {
@@ -201,7 +202,7 @@ class FileService {
         return {
           'exists': true,
           'permissions': false,
-          'message': '无法检查私钥权限',
+          'message': L.of.keyPermissionCheckFailed,
         };
       }
     }
