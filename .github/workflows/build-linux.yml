@@ -23,6 +23,13 @@ jobs:
             libayatana-appindicator3-dev
       - name: Install dependencies
         run: flutter pub get
+      - name: Cache Linux build artifacts
+        uses: actions/cache@v4
+        with:
+          path: build/linux
+          key: ${{ runner.os }}-flutter-build-${{ hashFiles('pubspec.lock', 'pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-build-
       - name: Build Linux release
         run: flutter build linux --release
       - name: Upload Linux artifact

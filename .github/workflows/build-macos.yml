@@ -17,6 +17,13 @@ jobs:
           flutter-version: 3.44.8
       - name: Install dependencies
         run: flutter pub get
+      - name: Cache macOS build artifacts
+        uses: actions/cache@v4
+        with:
+          path: build/macos
+          key: ${{ runner.os }}-flutter-build-${{ hashFiles('pubspec.lock', 'pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-build-
       - name: Build macOS release
         run: flutter build macos --release
       - name: Upload macOS artifact
