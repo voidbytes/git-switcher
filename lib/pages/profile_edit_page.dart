@@ -21,9 +21,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   final _gitconfigController = TextEditingController();
   final _hostController = TextEditingController();
   final _identityFileController = TextEditingController();
+  final _sshPortController = TextEditingController();
 
   bool _useSsh = false;
-  bool _usePort443 = false;
   bool _isLoading = false;
 
   @override
@@ -35,9 +35,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       _useSsh = widget.profile!.useSsh;
       _hostController.text = widget.profile!.host;
       _identityFileController.text = widget.profile!.identityFile;
-      _usePort443 = widget.profile!.usePort443;
+      _sshPortController.text = widget.profile!.sshPort?.toString() ?? '';
     } else {
       _hostController.text = 'github.com';
+      _sshPortController.text = '443';
     }
   }
 
@@ -47,6 +48,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     _gitconfigController.dispose();
     _hostController.dispose();
     _identityFileController.dispose();
+    _sshPortController.dispose();
     super.dispose();
   }
 
@@ -140,14 +142,26 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                     : null,
               ),
               const SizedBox(height: 8),
-              SwitchListTile(
-                title: const Text('通过 443 端口连接 (ssh.github.com)'),
-                subtitle: const Text('适用于端口 22 被网络阻断的 GitHub 场景'),
-                contentPadding: EdgeInsets.zero,
-                value: _usePort443,
-                onChanged: (value) {
-                  setState(() => _usePort443 = value);
-                },
+              TextFormField(
+                controller: _sshPortController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'SSH 端口',
+                  border: OutlineInputBorder(),
+                  helperText: '默认 443，留空则使用默认端口 22',
+                ),
+                validator: _useSsh
+                    ? (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return null;
+                        }
+                        final port = int.tryParse(value.trim());
+                        if (port == null || port < 1 || port > 65535) {
+                          return '请输入 1-65535 之间的端口号';
+                        }
+                        return null;
+                      }
+                    : null,
               ),
               const SizedBox(height: 16),
               Row(
@@ -259,6 +273,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     setState(() => _isLoading = true);
 
     try {
+      final portText = _sshPortController.text.trim();
+      final sshPort = _useSsh && portText.isNotEmpty
+          ? int.tryParse(portText)
+          : null;
+
       final profile = Profile(
         id: widget.profile?.id,
         name: _nameController.text.trim(),
@@ -266,7 +285,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         useSsh: _useSsh,
         host: _useSsh ? _hostController.text.trim() : '',
         identityFile: _useSsh ? _identityFileController.text.trim() : '',
-        usePort443: _useSsh && _usePort443,
+        sshPort: sshPort,
       );
 
       final success = widget.profile == null
