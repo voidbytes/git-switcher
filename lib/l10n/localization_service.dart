@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 import 'app_localizations.dart';
 
 /// 全局本地化访问器。
@@ -29,6 +30,8 @@ void applyLocale(String? code) {
   final locale = resolveLocale(code, systemLocale);
   localeNotifier.value = locale;
   L.initialize(lookupAppLocalizations(locale));
+  // 同步原生窗口标题栏文本，使其随语言切换。
+  windowManager.setTitle(L.of.appTitle);
 }
 
 /// 应用支持的语言代码（与 AppConfig.languageCode 及 ARB 文件名对应）。
