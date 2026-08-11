@@ -61,6 +61,15 @@ class GitService {
         await _fileService.cleanOldBackups(maxBackupCount);
       }
 
+      // 切换前记录当前配置，切换失败时用于回滚，避免半切换状态
+      final previousGitConfig = await _fileService.readFile(
+        _pathService.gitConfigPath,
+      );
+      final previousSshConfig =
+          profile.useSsh
+              ? await _fileService.readFile(_pathService.sshConfigPath)
+              : null;
+
       final gitResult = await _fileService.writeFile(
         _pathService.gitConfigPath,
         profile.gitconfig,
@@ -92,6 +101,20 @@ class GitService {
       if (results['git'] == true && results['ssh'] == true) {
         await _configService.updateActiveProfileId(profile.id);
       } else {
+        // 任一配置写入失败，回滚已写入的配置，避免处于半切换状态
+        if (previousGitConfig != null) {
+          await _fileService.writeFile(
+            _pathService.gitConfigPath,
+            previousGitConfig,
+          );
+        }
+        if (previousSshConfig != null) {
+          await _fileService.writeFile(
+            _pathService.sshConfigPath,
+            previousSshConfig,
+          );
+        }
+        messages.add('已回滚配置');
         await _configService.updateActiveProfileId(null);
       }
     } catch (e) {
