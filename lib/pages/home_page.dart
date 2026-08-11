@@ -173,17 +173,20 @@ class _HomePageState extends State<HomePage> {
     final IconData icon;
     final String title;
     final String subtitle;
+    final bool configMatched;
 
     if (_activeProfile != null) {
       cardColor = Colors.green.shade100;
       icon = Icons.check_circle;
       title = '当前激活: ${_activeProfile!.name}';
       subtitle = '系统配置与所选配置一致';
+      configMatched = true;
     } else {
       cardColor = Colors.orange.shade100;
       icon = Icons.warning;
-      title = '未知配置';
-      subtitle = '当前系统配置与本软件中任何配置都不匹配';
+      title = '配置不一致提醒';
+      subtitle = '当前系统配置与本软件中的配置不匹配，建议先备份当前配置并查看差异。';
+      configMatched = false;
     }
 
     return Card(
@@ -191,27 +194,240 @@ class _HomePageState extends State<HomePage> {
       color: cardColor,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: Theme.of(context).primaryColor),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+            Row(
+              children: [
+                Icon(icon, color: Theme.of(context).primaryColor),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(subtitle, style: const TextStyle(fontSize: 12)),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+            if (!configMatched) ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _backupCurrentConfig,
+                    icon: const Icon(Icons.backup, size: 18),
+                    label: const Text('备份当前配置'),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: _showConfigDiff,
+                    icon: const Icon(Icons.difference, size: 18),
+                    label: const Text('查看差异'),
+                  ),
                 ],
               ),
-            ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _backupCurrentConfig() async {
+    final messages = await _gitService.backupCurrentConfig();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(messages.join('\n')),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  Future<void> _showConfigDiff() async {
+    final profiles = _configService.profiles;
+    if (profiles.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('暂无配置可对比'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    // 收集每个配置的差异摘要
+    final diffs = <Profile, List<String>>{};
+    for (final profile in profiles) {
+      final result = await _gitService.getConfigDiff(profile);
+      final differences = (result['differences'] as List).cast<String>();
+      diffs[profile] = differences;
+    }
+
+    if (!mounted) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('查看配置差异'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true,
+            children: diffs.entries.map((entry) {
+              final profile = entry.key;
+              final differences = entry.value;
+              return ListTile(
+                dense: true,
+                leading: Icon(
+                  differences.isEmpty
+                      ? Icons.check_circle
+                      : Icons.error_outline,
+                  color: differences.isEmpty ? Colors.green : Colors.orange,
+                ),
+                title: Text(
+                  profile.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  differences.isEmpty
+                      ? '与当前配置一致'
+                      : differences.join('\n'),
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onTap: () => _showProfileDiffDetail(profile),
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showProfileDiffDetail(Profile profile) async {
+    final result = await _gitService.getConfigDiff(profile);
+    final differences = (result['differences'] as List).cast<String>();
+    final currentGitConfig = result['currentGitConfig'] as String?;
+    final profileGitConfig = result['profileGitConfig'] as String?;
+
+    if (!mounted) return;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('${profile.name} 配置差异'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: DefaultTabController(
+            length: 2,
+            child: differences.isEmpty
+                ? Column(
+                    children: [
+                      const Text(
+                        '该配置与当前配置一致',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: _buildConfigContentView(
+                          profileGitConfig ?? '（无目标配置）',
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '差异项:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ...differences.map(
+                                (d) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Text(
+                                    '• $d',
+                                    style: const TextStyle(
+                                      color: Colors.orange,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const TabBar(
+                        tabs: [Tab(text: '当前配置'), Tab(text: '目标配置')],
+                      ),
+                      Expanded(
+                        child: TabBarView(
+                          children: [
+                            _buildConfigContentView(
+                              currentGitConfig ?? '（无当前Git配置）',
+                            ),
+                            _buildConfigContentView(
+                              profileGitConfig ?? '（无目标配置）',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfigContentView(String content) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: SingleChildScrollView(
+        child: Text(
+          content,
+          style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
         ),
       ),
     );
