@@ -23,6 +23,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   final _identityFileController = TextEditingController();
 
   bool _useSsh = false;
+  bool _usePort443 = false;
   bool _isLoading = false;
 
   @override
@@ -34,6 +35,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       _useSsh = widget.profile!.useSsh;
       _hostController.text = widget.profile!.host;
       _identityFileController.text = widget.profile!.identityFile;
+      _usePort443 = widget.profile!.usePort443;
     } else {
       _hostController.text = 'github.com';
     }
@@ -136,6 +138,16 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                         return null;
                       }
                     : null,
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                title: const Text('通过 443 端口连接 (ssh.github.com)'),
+                subtitle: const Text('适用于端口 22 被网络阻断的 GitHub 场景'),
+                contentPadding: EdgeInsets.zero,
+                value: _usePort443,
+                onChanged: (value) {
+                  setState(() => _usePort443 = value);
+                },
               ),
               const SizedBox(height: 16),
               Row(
@@ -254,6 +266,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         useSsh: _useSsh,
         host: _useSsh ? _hostController.text.trim() : '',
         identityFile: _useSsh ? _identityFileController.text.trim() : '',
+        usePort443: _useSsh && _usePort443,
       );
 
       final success = widget.profile == null
