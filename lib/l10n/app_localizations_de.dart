@@ -470,4 +470,309 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get backupNothing => 'Nichts zu sichern';
+
+  @override
+  String get sshNoIdentityFile =>
+      'Keine IdentityFile-Zeile in der SSH-Konfiguration gefunden';
+
+  @override
+  String get verifyGitMismatch =>
+      'Git-Identitätsprüfung fehlgeschlagen: user.name oder user.email stimmen nicht mit der Zielkonfiguration überein';
+
+  @override
+  String verifySshFailed(Object host) {
+    return 'SSH-Überprüfung fehlgeschlagen: $host';
+  }
+
+  @override
+  String get undoFailed => 'Rückgängig machen fehlgeschlagen';
+
+  @override
+  String get importSystemGit => 'System-.gitconfig importieren';
+
+  @override
+  String get importSystemSsh => 'System-.ssh/config importieren';
+
+  @override
+  String get sshConfigContent => 'SSH-Konfigurationsinhalt';
+
+  @override
+  String get sshConfigHelper =>
+      'Inhalt der .ssh/config einfügen (Ganzdatei-Wechsel)';
+
+  @override
+  String get enterSshConfig =>
+      'Konfigurationsinhalt ist erforderlich, wenn SSH aktiviert ist';
+
+  @override
+  String get quickCreateTitle => 'Schnellerstellen';
+
+  @override
+  String get fromTemplate => 'Aus Vorlage';
+
+  @override
+  String get fromExistingProfile => 'Vorhandenes Profil kopieren';
+
+  @override
+  String get generateKeyPair => 'Schlüsselpaar generieren';
+
+  @override
+  String get sshPreviewTitle => 'Inhalt, der in ~/.ssh/config geschrieben wird';
+
+  @override
+  String get templateProviderTitle => 'Anbieter auswählen';
+
+  @override
+  String get providerGithub => 'GitHub';
+
+  @override
+  String get providerGitlab => 'GitLab';
+
+  @override
+  String get providerGitee => 'Gitee';
+
+  @override
+  String get providerBlank => 'Leer';
+
+  @override
+  String get templateModeTitle => 'Verbindungsmodus';
+
+  @override
+  String get modeDirect => 'Direkt';
+
+  @override
+  String get modeProxy => 'Proxy';
+
+  @override
+  String get proxyAddress => 'Proxy-Adresse';
+
+  @override
+  String get proxyAddressHint =>
+      'Leer lassen, um Standard 127.0.0.1:7890 zu verwenden';
+
+  @override
+  String get templateGenerated => 'SSH-Konfigurationsvorlage generiert';
+
+  @override
+  String get selectProfileToCopy => 'Zu kopierendes Profil auswählen';
+
+  @override
+  String get copyProfileSuffix => ' (Kopie)';
+
+  @override
+  String get confirm => 'Bestätigen';
+
+  @override
+  String get importSshConfigSuccess =>
+      'Aktuelle .ssh/config erfolgreich importiert';
+
+  @override
+  String get importSshConfigFailed =>
+      '.ssh/config nicht gefunden oder konnte nicht gelesen werden';
+
+  @override
+  String get onboardingWelcome => 'Willkommen bei Git Switcher';
+
+  @override
+  String get onboardingSubtitle =>
+      'Verwalten und wechseln Sie mit einem Klick zwischen mehreren Git-/SSH-Identitäten';
+
+  @override
+  String get onboardingNameHint =>
+      'Dieses Profil benennen (z. B. Arbeitskonto)';
+
+  @override
+  String get onboardingImportDone =>
+      'Aktuelle Systemkonfiguration importiert, vor dem Speichern änderbar';
+
+  @override
+  String get onboardingImport => 'Aktuelle Systemkonfiguration importieren';
+
+  @override
+  String get onboardingSkip => 'Überspringen';
+
+  @override
+  String get onboardingFinish => 'Fertig';
+
+  @override
+  String get overwriteSshTitle =>
+      'Bestätigung zum Überschreiben der SSH-Konfiguration';
+
+  @override
+  String get overwriteSshContent =>
+      'Sie sind dabei, eine SSH-Konfiguration zu überschreiben, die nicht von diesem Tool verwaltet wird. Fortfahren?';
+
+  @override
+  String get switchVerified => 'Wechsel erfolgreich, Identität verifiziert';
+
+  @override
+  String get switchWrittenNotVerified =>
+      'Konfiguration geschrieben, aber Überprüfung fehlgeschlagen';
+
+  @override
+  String get undoSuccess => 'Zur vorherigen Konfiguration zurückgesetzt';
+
+  @override
+  String get undoNothing => 'Nichts rückgängig zu machen';
+
+  @override
+  String get undoLastSwitch => 'Letzten Wechsel rückgängig machen';
+
+  @override
+  String get keyManagementTitle => 'Schlüsselverwaltung';
+
+  @override
+  String get keyIdentifier => 'Kennung (Englisch)';
+
+  @override
+  String get keyIdentifierHelper =>
+      'Nur Buchstaben, Zahlen, - und _ erlaubt, für Dateinamen verwendet';
+
+  @override
+  String get keyIdentifierInvalid =>
+      'Kennung erlaubt nur Englisch, Zahlen, - und _';
+
+  @override
+  String get keyEmail => 'E-Mail (optional)';
+
+  @override
+  String get keyEmailInvalid => 'Ungültiges E-Mail-Format, muss @ enthalten';
+
+  @override
+  String get keyPassphrase => 'Passphrase (optional)';
+
+  @override
+  String get keyPassphraseHelper =>
+      'Leer lassen für keine Passphrase; wenn gesetzt, bei jeder Verwendung erforderlich';
+
+  @override
+  String get keyAlgorithmLabel => 'Algorithmus';
+
+  @override
+  String get generateKey => 'Schlüsselpaar generieren';
+
+  @override
+  String get privateKeyPath => 'Pfad zum privaten Schlüssel';
+
+  @override
+  String get publicKey => 'Öffentlicher Schlüssel';
+
+  @override
+  String get copyPublicKey => 'Öffentlichen Schlüssel kopieren';
+
+  @override
+  String get fillIdentityFile => 'In aktuelle Konfiguration einfügen';
+
+  @override
+  String get keygenSuccess => 'Schlüsselpaar erfolgreich generiert';
+
+  @override
+  String keygenFailed(Object message) {
+    return 'Schlüsselgenerierung fehlgeschlagen: $message';
+  }
+
+  @override
+  String get keygenUnavailable =>
+      'ssh-keygen nicht gefunden. Bitte OpenSSH-Client installieren';
+
+  @override
+  String get keyExistsTitle => 'Schlüssel existiert bereits';
+
+  @override
+  String keyExistsContent(Object path) {
+    return 'Schlüssel existiert bereits: $path\nÜberschreiben?';
+  }
+
+  @override
+  String get passphraseReminder =>
+      'Passphrase gesetzt; sie wird bei jeder Verwendung erforderlich sein';
+
+  @override
+  String get fillIdentityFileDone => 'IdentityFile-Zeile eingefügt';
+
+  @override
+  String get publicKeyCopied =>
+      'Öffentlicher Schlüssel in die Zwischenablage kopiert';
+
+  @override
+  String get keygenDetecting => 'Prüfe ssh-keygen-Verfügbarkeit…';
+
+  @override
+  String keygenDetectedAt(Object path) {
+    return 'ssh-keygen erkannt: $path';
+  }
+
+  @override
+  String get keygenNotFound =>
+      'ssh-keygen nicht gefunden. OpenSSH-Client installieren oder Pfad angeben';
+
+  @override
+  String get keygenPathLabel => 'Benutzerdefinierter ssh-keygen-Pfad';
+
+  @override
+  String get keygenPathHint =>
+      'Leer lassen für Auto-Erkennung (PATH / übliche Installationsorte)';
+
+  @override
+  String get keygenVerifyBtn => 'Prüfen';
+
+  @override
+  String get keygenResetBtn => 'Auto-Erkennung zurücksetzen';
+
+  @override
+  String get keygenBrowseBtn => 'Durchsuchen';
+
+  @override
+  String keygenPathValid(Object path) {
+    return 'Gültiger ssh-keygen-Pfad: $path';
+  }
+
+  @override
+  String keygenPathInvalid(Object path) {
+    return 'Ungültiger ssh-keygen-Pfad: $path';
+  }
+
+  @override
+  String get logSettings => 'Protokolleinstellungen';
+
+  @override
+  String get logSettingsSubtitle => 'Protokollstufe und Speicherort';
+
+  @override
+  String get logLevel => 'Protokollstufe';
+
+  @override
+  String get logLevelTrace => 'TRACE (am ausführlichsten)';
+
+  @override
+  String get logLevelDebug => 'DEBUG (Debuggen)';
+
+  @override
+  String get logLevelInfo => 'INFO (Standard)';
+
+  @override
+  String get logLevelWarn => 'WARN (Warnungen)';
+
+  @override
+  String get logLevelError => 'ERROR (nur Fehler)';
+
+  @override
+  String get logFileLocation => 'Protokollverzeichnis';
+
+  @override
+  String get onboardingDemoButton => 'Beispielprofile ausprobieren';
+
+  @override
+  String get onboardingDemoHint =>
+      'Kein Konto erforderlich — zwei Beispielprofile importieren und alle Funktionen ohne Registrierung ausprobieren';
+
+  @override
+  String get onboardingDemoDone =>
+      'Beispielprofile importiert — klicken Sie auf „Fertig stellen“, um zu starten';
+
+  @override
+  String get demoProfileWorkName => 'Beispiel-Arbeitskonto';
+
+  @override
+  String get demoProfilePersonalName => 'Beispiel-Personalkonto';
 }

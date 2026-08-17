@@ -467,4 +467,308 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get backupNothing => 'Нечего создавать резервную копию';
+
+  @override
+  String get sshNoIdentityFile =>
+      'Строка IdentityFile не найдена в конфигурации SSH';
+
+  @override
+  String get verifyGitMismatch =>
+      'Не удалось проверить личность Git: user.name или user.email не соответствуют целевой конфигурации';
+
+  @override
+  String verifySshFailed(Object host) {
+    return 'Не удалось проверить SSH: $host';
+  }
+
+  @override
+  String get undoFailed => 'Не удалось отменить';
+
+  @override
+  String get importSystemGit => 'Импортировать системный .gitconfig';
+
+  @override
+  String get importSystemSsh => 'Импортировать системный .ssh/config';
+
+  @override
+  String get sshConfigContent => 'Содержимое конфигурации SSH';
+
+  @override
+  String get sshConfigHelper =>
+      'Вставьте содержимое .ssh/config (переключение всего файла)';
+
+  @override
+  String get enterSshConfig =>
+      'Содержимое конфигурации обязательно, если SSH включен';
+
+  @override
+  String get quickCreateTitle => 'Быстрое создание';
+
+  @override
+  String get fromTemplate => 'Из шаблона';
+
+  @override
+  String get fromExistingProfile => 'Копировать существующий профиль';
+
+  @override
+  String get generateKeyPair => 'Создать пару ключей';
+
+  @override
+  String get sshPreviewTitle =>
+      'Содержимое, которое будет записано в ~/.ssh/config';
+
+  @override
+  String get templateProviderTitle => 'Выберите провайдера';
+
+  @override
+  String get providerGithub => 'GitHub';
+
+  @override
+  String get providerGitlab => 'GitLab';
+
+  @override
+  String get providerGitee => 'Gitee';
+
+  @override
+  String get providerBlank => 'Пусто';
+
+  @override
+  String get templateModeTitle => 'Режим подключения';
+
+  @override
+  String get modeDirect => 'Прямое';
+
+  @override
+  String get modeProxy => 'Прокси';
+
+  @override
+  String get proxyAddress => 'Адрес прокси';
+
+  @override
+  String get proxyAddressHint =>
+      'Оставьте пустым, чтобы использовать по умолчанию 127.0.0.1:7890';
+
+  @override
+  String get templateGenerated => 'Шаблон конфигурации SSH создан';
+
+  @override
+  String get selectProfileToCopy => 'Выберите профиль для копирования';
+
+  @override
+  String get copyProfileSuffix => ' (копия)';
+
+  @override
+  String get confirm => 'Подтвердить';
+
+  @override
+  String get importSshConfigSuccess =>
+      'Текущая конфигурация .ssh/config успешно импортирована';
+
+  @override
+  String get importSshConfigFailed =>
+      '.ssh/config не найден или не может быть прочитан';
+
+  @override
+  String get onboardingWelcome => 'Добро пожаловать в Git Switcher';
+
+  @override
+  String get onboardingSubtitle =>
+      'Управляйте и переключайтесь между несколькими личностями Git / SSH в один клик';
+
+  @override
+  String get onboardingNameHint =>
+      'Назовите этот профиль (например, рабочая учетная запись)';
+
+  @override
+  String get onboardingImportDone =>
+      'Текущая системная конфигурация импортирована, вы можете изменить ее перед сохранением';
+
+  @override
+  String get onboardingImport => 'Импортировать текущую системную конфигурацию';
+
+  @override
+  String get onboardingSkip => 'Пропустить';
+
+  @override
+  String get onboardingFinish => 'Готово';
+
+  @override
+  String get overwriteSshTitle => 'Подтверждение перезаписи конфигурации SSH';
+
+  @override
+  String get overwriteSshContent =>
+      'Вы собираетесь перезаписать конфигурацию SSH, не управляемую этим инструментом. Продолжить?';
+
+  @override
+  String get switchVerified => 'Переключение успешно, личность проверена';
+
+  @override
+  String get switchWrittenNotVerified =>
+      'Конфигурация записана, но проверка не удалась';
+
+  @override
+  String get undoSuccess => 'Возвращено к предыдущей конфигурации';
+
+  @override
+  String get undoNothing => 'Нечего отменять';
+
+  @override
+  String get undoLastSwitch => 'Отменить последнее переключение';
+
+  @override
+  String get keyManagementTitle => 'Управление ключами';
+
+  @override
+  String get keyIdentifier => 'Идентификатор (англ.)';
+
+  @override
+  String get keyIdentifierHelper =>
+      'Разрешены только буквы, цифры, - и _, используются для имен файлов';
+
+  @override
+  String get keyIdentifierInvalid =>
+      'Идентификатор допускает только английские буквы, цифры, - и _';
+
+  @override
+  String get keyEmail => 'Эл. почта (необязательно)';
+
+  @override
+  String get keyEmailInvalid => 'Неверный формат эл. почты, должен содержать @';
+
+  @override
+  String get keyPassphrase => 'Парольная фраза (необязательно)';
+
+  @override
+  String get keyPassphraseHelper =>
+      'Оставьте пустым, чтобы не использовать парольную фразу; если задана, требуется при каждом использовании';
+
+  @override
+  String get keyAlgorithmLabel => 'Алгоритм';
+
+  @override
+  String get generateKey => 'Создать пару ключей';
+
+  @override
+  String get privateKeyPath => 'Путь к приватному ключу';
+
+  @override
+  String get publicKey => 'Публичный ключ';
+
+  @override
+  String get copyPublicKey => 'Скопировать публичный ключ';
+
+  @override
+  String get fillIdentityFile => 'Заполнить в текущей конфигурации';
+
+  @override
+  String get keygenSuccess => 'Пара ключей успешно создана';
+
+  @override
+  String keygenFailed(Object message) {
+    return 'Не удалось создать ключи: $message';
+  }
+
+  @override
+  String get keygenUnavailable =>
+      'ssh-keygen не найден. Установите клиент OpenSSH';
+
+  @override
+  String get keyExistsTitle => 'Ключ уже существует';
+
+  @override
+  String keyExistsContent(Object path) {
+    return 'Ключ уже существует: $path\nПерезаписать?';
+  }
+
+  @override
+  String get passphraseReminder =>
+      'Парольная фраза задана; она будет требоваться при каждом использовании';
+
+  @override
+  String get fillIdentityFileDone => 'Строка IdentityFile заполнена';
+
+  @override
+  String get publicKeyCopied => 'Публичный ключ скопирован в буфер обмена';
+
+  @override
+  String get keygenDetecting => 'Проверка доступности ssh-keygen…';
+
+  @override
+  String keygenDetectedAt(Object path) {
+    return 'ssh-keygen обнаружен: $path';
+  }
+
+  @override
+  String get keygenNotFound =>
+      'ssh-keygen не найден. Установите клиент OpenSSH или укажите путь';
+
+  @override
+  String get keygenPathLabel => 'Пользовательский путь ssh-keygen';
+
+  @override
+  String get keygenPathHint =>
+      'Оставьте пустым для автоматического обнаружения (PATH / стандартные места установки)';
+
+  @override
+  String get keygenVerifyBtn => 'Проверить';
+
+  @override
+  String get keygenResetBtn => 'Сбросить автоопределение';
+
+  @override
+  String get keygenBrowseBtn => 'Обзор';
+
+  @override
+  String keygenPathValid(Object path) {
+    return 'Действительный путь ssh-keygen: $path';
+  }
+
+  @override
+  String keygenPathInvalid(Object path) {
+    return 'Недопустимый путь ssh-keygen: $path';
+  }
+
+  @override
+  String get logSettings => 'Настройки журнала';
+
+  @override
+  String get logSettingsSubtitle => 'Уровень журнала и место хранения';
+
+  @override
+  String get logLevel => 'Уровень журнала';
+
+  @override
+  String get logLevelTrace => 'TRACE (самый подробный)';
+
+  @override
+  String get logLevelDebug => 'DEBUG (отладка)';
+
+  @override
+  String get logLevelInfo => 'INFO (по умолчанию)';
+
+  @override
+  String get logLevelWarn => 'WARN (предупреждения)';
+
+  @override
+  String get logLevelError => 'ERROR (только ошибки)';
+
+  @override
+  String get logFileLocation => 'Каталог журнала';
+
+  @override
+  String get onboardingDemoButton => 'Попробовать примеры профилей';
+
+  @override
+  String get onboardingDemoHint =>
+      'Учётная запись не требуется — импортируйте два примера профилей, чтобы попробовать все функции без регистрации';
+
+  @override
+  String get onboardingDemoDone =>
+      'Примеры профилей импортированы — нажмите «Готово», чтобы начать';
+
+  @override
+  String get demoProfileWorkName => 'Рабочая учётная запись (пример)';
+
+  @override
+  String get demoProfilePersonalName => 'Личная учётная запись (пример)';
 }

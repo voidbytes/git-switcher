@@ -462,4 +462,303 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupNothing => 'Nothing to back up';
+
+  @override
+  String get sshNoIdentityFile => 'No IdentityFile line found in SSH config';
+
+  @override
+  String get verifyGitMismatch =>
+      'Git identity verification failed: user.name or user.email does not match the target config';
+
+  @override
+  String verifySshFailed(Object host) {
+    return 'SSH verification failed: $host';
+  }
+
+  @override
+  String get undoFailed => 'Undo failed';
+
+  @override
+  String get importSystemGit => 'Import system .gitconfig';
+
+  @override
+  String get importSystemSsh => 'Import system .ssh/config';
+
+  @override
+  String get sshConfigContent => 'SSH Config Content';
+
+  @override
+  String get sshConfigHelper =>
+      'Paste the .ssh/config content (full-file switching)';
+
+  @override
+  String get enterSshConfig => 'Config content is required when SSH is enabled';
+
+  @override
+  String get quickCreateTitle => 'Quick Create';
+
+  @override
+  String get fromTemplate => 'From template';
+
+  @override
+  String get fromExistingProfile => 'Copy existing profile';
+
+  @override
+  String get generateKeyPair => 'Generate key pair';
+
+  @override
+  String get sshPreviewTitle => 'Content to be written to ~/.ssh/config';
+
+  @override
+  String get templateProviderTitle => 'Select provider';
+
+  @override
+  String get providerGithub => 'GitHub';
+
+  @override
+  String get providerGitlab => 'GitLab';
+
+  @override
+  String get providerGitee => 'Gitee';
+
+  @override
+  String get providerBlank => 'Blank';
+
+  @override
+  String get templateModeTitle => 'Connection mode';
+
+  @override
+  String get modeDirect => 'Direct';
+
+  @override
+  String get modeProxy => 'Proxy';
+
+  @override
+  String get proxyAddress => 'Proxy address';
+
+  @override
+  String get proxyAddressHint => 'Leave empty to use default 127.0.0.1:7890';
+
+  @override
+  String get templateGenerated => 'SSH config template generated';
+
+  @override
+  String get selectProfileToCopy => 'Select profile to copy';
+
+  @override
+  String get copyProfileSuffix => ' (copy)';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get importSshConfigSuccess =>
+      'Successfully imported current .ssh/config';
+
+  @override
+  String get importSshConfigFailed =>
+      '.ssh/config not found or could not be read';
+
+  @override
+  String get onboardingWelcome => 'Welcome to Git Switcher';
+
+  @override
+  String get onboardingSubtitle =>
+      'Manage and switch between multiple Git / SSH identities with one click';
+
+  @override
+  String get onboardingNameHint => 'Name this profile (e.g. Work account)';
+
+  @override
+  String get onboardingImportDone =>
+      'Current system config imported, you can modify before saving';
+
+  @override
+  String get onboardingImport => 'Import current system config';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingFinish => 'Finish';
+
+  @override
+  String get overwriteSshTitle => 'Overwrite SSH config confirmation';
+
+  @override
+  String get overwriteSshContent =>
+      'You are about to overwrite an SSH config not managed by this tool. Continue?';
+
+  @override
+  String get switchVerified => 'Switch successful, identity verified';
+
+  @override
+  String get switchWrittenNotVerified =>
+      'Config written, but verification failed';
+
+  @override
+  String get undoSuccess => 'Undone to the previous config';
+
+  @override
+  String get undoNothing => 'Nothing to undo';
+
+  @override
+  String get undoLastSwitch => 'Undo last switch';
+
+  @override
+  String get keyManagementTitle => 'Key management';
+
+  @override
+  String get keyIdentifier => 'Identifier (English)';
+
+  @override
+  String get keyIdentifierHelper =>
+      'Only letters, numbers, - and _ allowed, used for file names';
+
+  @override
+  String get keyIdentifierInvalid =>
+      'Identifier only allows English, numbers, - and _';
+
+  @override
+  String get keyEmail => 'Email (optional)';
+
+  @override
+  String get keyEmailInvalid => 'Invalid email format, must contain @';
+
+  @override
+  String get keyPassphrase => 'Passphrase (optional)';
+
+  @override
+  String get keyPassphraseHelper =>
+      'Leave empty for no passphrase; required on every use if set';
+
+  @override
+  String get keyAlgorithmLabel => 'Algorithm';
+
+  @override
+  String get generateKey => 'Generate key pair';
+
+  @override
+  String get privateKeyPath => 'Private key path';
+
+  @override
+  String get publicKey => 'Public key';
+
+  @override
+  String get copyPublicKey => 'Copy public key';
+
+  @override
+  String get fillIdentityFile => 'Fill into current config';
+
+  @override
+  String get keygenSuccess => 'Key pair generated successfully';
+
+  @override
+  String keygenFailed(Object message) {
+    return 'Key generation failed: $message';
+  }
+
+  @override
+  String get keygenUnavailable =>
+      'ssh-keygen not found. Please install OpenSSH client';
+
+  @override
+  String get keyExistsTitle => 'Key already exists';
+
+  @override
+  String keyExistsContent(Object path) {
+    return 'Key already exists: $path\nOverwrite?';
+  }
+
+  @override
+  String get passphraseReminder =>
+      'Passphrase set; it will be required on every use';
+
+  @override
+  String get fillIdentityFileDone => 'IdentityFile line filled';
+
+  @override
+  String get publicKeyCopied => 'Public key copied to clipboard';
+
+  @override
+  String get keygenDetecting => 'Checking ssh-keygen availability…';
+
+  @override
+  String keygenDetectedAt(Object path) {
+    return 'ssh-keygen detected: $path';
+  }
+
+  @override
+  String get keygenNotFound =>
+      'ssh-keygen not found. Install OpenSSH client or specify a path';
+
+  @override
+  String get keygenPathLabel => 'Custom ssh-keygen path';
+
+  @override
+  String get keygenPathHint =>
+      'Leave empty to auto-detect (PATH / common install locations)';
+
+  @override
+  String get keygenVerifyBtn => 'Verify';
+
+  @override
+  String get keygenResetBtn => 'Reset to auto-detect';
+
+  @override
+  String get keygenBrowseBtn => 'Browse';
+
+  @override
+  String keygenPathValid(Object path) {
+    return 'Valid ssh-keygen path: $path';
+  }
+
+  @override
+  String keygenPathInvalid(Object path) {
+    return 'Invalid ssh-keygen path: $path';
+  }
+
+  @override
+  String get logSettings => 'Log Settings';
+
+  @override
+  String get logSettingsSubtitle => 'Log level and storage location';
+
+  @override
+  String get logLevel => 'Log level';
+
+  @override
+  String get logLevelTrace => 'TRACE (most verbose)';
+
+  @override
+  String get logLevelDebug => 'DEBUG (debugging)';
+
+  @override
+  String get logLevelInfo => 'INFO (default)';
+
+  @override
+  String get logLevelWarn => 'WARN (warnings)';
+
+  @override
+  String get logLevelError => 'ERROR (errors only)';
+
+  @override
+  String get logFileLocation => 'Log directory';
+
+  @override
+  String get onboardingDemoButton => 'Try sample profiles';
+
+  @override
+  String get onboardingDemoHint =>
+      'No account needed — import two sample profiles to explore all features without registering';
+
+  @override
+  String get onboardingDemoDone =>
+      'Sample profiles imported — click Finish to start';
+
+  @override
+  String get demoProfileWorkName => 'Sample Work Account';
+
+  @override
+  String get demoProfilePersonalName => 'Sample Personal Account';
 }

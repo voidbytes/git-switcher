@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/backup_item.dart';
 import '../services/file_service.dart';
+import '../services/git_service.dart';
 
 class BackupPage extends StatefulWidget {
   const BackupPage({super.key});
@@ -207,7 +208,7 @@ class _BackupPageState extends State<BackupPage> {
     if (confirmed == true && _selectedBackup != null) {
       setState(() => _isLoading = true);
       try {
-        final success = await FileService.instance.restoreBackup(
+        final success = await GitService.instance.restoreBackupAndRecompute(
           _selectedBackup!,
         );
         if (mounted) {

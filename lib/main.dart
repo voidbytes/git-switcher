@@ -7,13 +7,26 @@ import 'package:window_manager/window_manager.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/localization_service.dart';
 import 'pages/home_page.dart';
+import 'pages/onboarding_page.dart';
 import 'services/config_service.dart';
+import 'services/log_service.dart';
+import 'services/path_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PathService.instance.initialize();
+  LogService.instance.initialize(
+    logDir: PathService.instance.logsDir,
+    level: LogLevel.info,
+  );
   await ConfigService.instance.initialize();
+  // 应用用户持久化的日志级别（配置缺省时保持默认 info）。
+  LogService.instance.setLevel(
+    LogLevel.fromString(ConfigService.instance.appConfig.logLevel ?? 'info'),
+  );
+  LogService.instance.info('Git Switcher GUI 启动', tag: 'App');
   await windowManager.ensureInitialized();
 
   WindowOptions windowOptions = const WindowOptions(
@@ -151,9 +164,16 @@ class _GitSwitcherAppState extends State<GitSwitcherApp>
               seedColor: Colors.lightBlueAccent,
             ),
             useMaterial3: true,
-          ),
-          home: const HomePage(),
-        );
+        ),
+        // 首次启动引导（规格 5.6）：onboarded=false 且无 Profile 时显示。
+        home: (!ConfigService.instance.appConfig.onboarded &&
+                ConfigService.instance.profiles.isEmpty)
+            ? const OnboardingPage()
+            : const HomePage(),
+        routes: {
+          '/home': (context) => const HomePage(),
+        },
+      );
       },
     );
   }

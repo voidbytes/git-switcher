@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
-import '../l10n/localization_service.dart';
+import '../l10n/core_messages.dart';
 import '../models/backup_item.dart';
+import 'log_service.dart';
 import 'path_service.dart';
 
 class FileService {
@@ -19,7 +19,7 @@ class FileService {
       }
       return null;
     } catch (e) {
-      debugPrint('读取文件失败: $path, 错误: $e');
+      Log.instance.error('读取文件失败: $path, 错误: $e');
       return null;
     }
   }
@@ -36,7 +36,21 @@ class FileService {
 
       return true;
     } catch (e) {
-      debugPrint('写入文件失败: $path, 错误: $e');
+      Log.instance.error('写入文件失败: $path, 错误: $e');
+      return false;
+    }
+  }
+
+  /// 文件存在时删除（用于撤销：还原到切换前文件不存在/为空的状态）。
+  Future<bool> deleteFileIfExists(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      return true;
+    } catch (e) {
+      Log.instance.error('删除文件失败: $path, 错误: $e');
       return false;
     }
   }
@@ -58,7 +72,7 @@ class FileService {
       await sourceFile.copy(backupPath);
       return backupPath;
     } catch (e) {
-      debugPrint('备份文件失败: $sourcePath, 错误: $e');
+      Log.instance.warn('备份文件失败: $sourcePath, 错误: $e');
       return null;
     }
   }
@@ -115,7 +129,7 @@ class FileService {
 
       backupItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
-      debugPrint('获取备份列表失败: $e');
+      Log.instance.warn('获取备份列表失败: $e');
     }
 
     return backupItems;
@@ -140,7 +154,7 @@ class FileService {
       await backupFile.copy(targetPath);
       return true;
     } catch (e) {
-      debugPrint('恢复备份失败: $e');
+      Log.instance.error('恢复备份失败: $e');
       return false;
     }
   }
@@ -171,17 +185,27 @@ class FileService {
         await files[i].delete();
       }
     } catch (e) {
-      debugPrint('清理备份失败: $dirPath, 错误: $e');
+      Log.instance.warn('清理备份失败: $dirPath, 错误: $e');
     }
   }
 
   Future<Map<String, dynamic>> checkSshKeyFile(String keyPath) async {
-    final resolvedPath = _pathService.resolvePath(keyPath);
+    var resolvedPath = _pathService.resolvePath(keyPath);
     final file = File(resolvedPath);
 
     if (!await file.exists()) {
-      return {'exists': false, 'message': L.of.keyFileNotExist(resolvedPath)};
+      return {
+        'exists': false,
+        'message': Msg.of.keyFileNotExist(resolvedPath),
+      };
     }
+
+    // 符号链接时解析到真实目标再检查权限（stat 默认显示链接自身 777，
+    // 而 ssh 实际使用目标文件权限）。
+    try {
+      final realPath = await file.resolveSymbolicLinks();
+      if (realPath.isNotEmpty) resolvedPath = realPath;
+    } catch (_) {}
 
     if (!Platform.isWindows) {
       try {
@@ -194,15 +218,15 @@ class FileService {
           return {
             'exists': true,
             'permissions': false,
-            'message': L.of.keyPermissionIncorrect(permissions),
+            'message': Msg.of.keyPermissionIncorrect(permissions),
           };
         }
       } catch (e) {
-        debugPrint('检查文件权限失败: $e');
+        Log.instance.warn('检查文件权限失败: $e');
         return {
           'exists': true,
           'permissions': false,
-          'message': L.of.keyPermissionCheckFailed,
+          'message': Msg.of.keyPermissionCheckFailed,
         };
       }
     }

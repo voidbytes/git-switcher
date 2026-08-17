@@ -908,6 +908,546 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'没有可备份的配置'**
   String get backupNothing;
+
+  /// No description provided for @sshNoIdentityFile.
+  ///
+  /// In zh, this message translates to:
+  /// **'SSH 配置中未找到 IdentityFile 行'**
+  String get sshNoIdentityFile;
+
+  /// No description provided for @verifyGitMismatch.
+  ///
+  /// In zh, this message translates to:
+  /// **'Git 身份验证未通过：user.name 或 user.email 与目标配置不一致'**
+  String get verifyGitMismatch;
+
+  /// No description provided for @verifySshFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'SSH 验证未通过: {host}'**
+  String verifySshFailed(Object host);
+
+  /// No description provided for @undoFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'撤销失败'**
+  String get undoFailed;
+
+  /// No description provided for @importSystemGit.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入系统 .gitconfig'**
+  String get importSystemGit;
+
+  /// No description provided for @importSystemSsh.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入系统 .ssh/config'**
+  String get importSystemSsh;
+
+  /// No description provided for @sshConfigContent.
+  ///
+  /// In zh, this message translates to:
+  /// **'SSH 配置内容'**
+  String get sshConfigContent;
+
+  /// No description provided for @sshConfigHelper.
+  ///
+  /// In zh, this message translates to:
+  /// **'粘贴 .ssh/config 内容（整文件切换）'**
+  String get sshConfigHelper;
+
+  /// No description provided for @enterSshConfig.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用 SSH 时必须填写配置内容'**
+  String get enterSshConfig;
+
+  /// No description provided for @quickCreateTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'快捷创建'**
+  String get quickCreateTitle;
+
+  /// No description provided for @fromTemplate.
+  ///
+  /// In zh, this message translates to:
+  /// **'从模板'**
+  String get fromTemplate;
+
+  /// No description provided for @fromExistingProfile.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制已有配置'**
+  String get fromExistingProfile;
+
+  /// No description provided for @generateKeyPair.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成密钥对'**
+  String get generateKeyPair;
+
+  /// No description provided for @sshPreviewTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'将写入 ~/.ssh/config 的内容'**
+  String get sshPreviewTitle;
+
+  /// No description provided for @templateProviderTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择服务商'**
+  String get templateProviderTitle;
+
+  /// No description provided for @providerGithub.
+  ///
+  /// In zh, this message translates to:
+  /// **'GitHub'**
+  String get providerGithub;
+
+  /// No description provided for @providerGitlab.
+  ///
+  /// In zh, this message translates to:
+  /// **'GitLab'**
+  String get providerGitlab;
+
+  /// No description provided for @providerGitee.
+  ///
+  /// In zh, this message translates to:
+  /// **'Gitee'**
+  String get providerGitee;
+
+  /// No description provided for @providerBlank.
+  ///
+  /// In zh, this message translates to:
+  /// **'空白'**
+  String get providerBlank;
+
+  /// No description provided for @templateModeTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'连接方式'**
+  String get templateModeTitle;
+
+  /// No description provided for @modeDirect.
+  ///
+  /// In zh, this message translates to:
+  /// **'直连'**
+  String get modeDirect;
+
+  /// No description provided for @modeProxy.
+  ///
+  /// In zh, this message translates to:
+  /// **'代理'**
+  String get modeProxy;
+
+  /// No description provided for @proxyAddress.
+  ///
+  /// In zh, this message translates to:
+  /// **'代理地址'**
+  String get proxyAddress;
+
+  /// No description provided for @proxyAddressHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'留空使用默认 127.0.0.1:7890'**
+  String get proxyAddressHint;
+
+  /// No description provided for @templateGenerated.
+  ///
+  /// In zh, this message translates to:
+  /// **'已生成 SSH 配置模板'**
+  String get templateGenerated;
+
+  /// No description provided for @selectProfileToCopy.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择要复制的配置'**
+  String get selectProfileToCopy;
+
+  /// No description provided for @copyProfileSuffix.
+  ///
+  /// In zh, this message translates to:
+  /// **'（副本）'**
+  String get copyProfileSuffix;
+
+  /// No description provided for @confirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定'**
+  String get confirm;
+
+  /// No description provided for @importSshConfigSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'成功导入当前 .ssh/config 配置'**
+  String get importSshConfigSuccess;
+
+  /// No description provided for @importSshConfigFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'未找到 .ssh/config 文件或读取失败'**
+  String get importSshConfigFailed;
+
+  /// No description provided for @onboardingWelcome.
+  ///
+  /// In zh, this message translates to:
+  /// **'欢迎使用 Git Switcher'**
+  String get onboardingWelcome;
+
+  /// No description provided for @onboardingSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'轻松管理并一键切换多个 Git / SSH 身份'**
+  String get onboardingSubtitle;
+
+  /// No description provided for @onboardingNameHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'为该配置命名（如：工作账号）'**
+  String get onboardingNameHint;
+
+  /// No description provided for @onboardingImportDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'已导入当前系统配置，可修改后保存'**
+  String get onboardingImportDone;
+
+  /// No description provided for @onboardingImport.
+  ///
+  /// In zh, this message translates to:
+  /// **'一键导入当前系统配置'**
+  String get onboardingImport;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In zh, this message translates to:
+  /// **'跳过'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingFinish.
+  ///
+  /// In zh, this message translates to:
+  /// **'完成'**
+  String get onboardingFinish;
+
+  /// No description provided for @overwriteSshTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'覆盖 SSH 配置确认'**
+  String get overwriteSshTitle;
+
+  /// No description provided for @overwriteSshContent.
+  ///
+  /// In zh, this message translates to:
+  /// **'即将覆盖一个不是由本工具管理的 SSH 配置，是否继续？'**
+  String get overwriteSshContent;
+
+  /// No description provided for @switchVerified.
+  ///
+  /// In zh, this message translates to:
+  /// **'切换成功，身份已验证'**
+  String get switchVerified;
+
+  /// No description provided for @switchWrittenNotVerified.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置已写入，但验证未通过'**
+  String get switchWrittenNotVerified;
+
+  /// No description provided for @undoSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'已撤销到之前的配置'**
+  String get undoSuccess;
+
+  /// No description provided for @undoNothing.
+  ///
+  /// In zh, this message translates to:
+  /// **'没有可撤销的变更'**
+  String get undoNothing;
+
+  /// No description provided for @undoLastSwitch.
+  ///
+  /// In zh, this message translates to:
+  /// **'撤销上次切换'**
+  String get undoLastSwitch;
+
+  /// No description provided for @keyManagementTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'密钥管理'**
+  String get keyManagementTitle;
+
+  /// No description provided for @keyIdentifier.
+  ///
+  /// In zh, this message translates to:
+  /// **'标识（英文）'**
+  String get keyIdentifier;
+
+  /// No description provided for @keyIdentifierHelper.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅限字母、数字、- 和 _，用于生成文件名'**
+  String get keyIdentifierHelper;
+
+  /// No description provided for @keyIdentifierInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'标识仅允许英文、数字、- 和 _'**
+  String get keyIdentifierInvalid;
+
+  /// No description provided for @keyEmail.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱（可选）'**
+  String get keyEmail;
+
+  /// No description provided for @keyEmailInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱格式不正确，应包含 @'**
+  String get keyEmailInvalid;
+
+  /// No description provided for @keyPassphrase.
+  ///
+  /// In zh, this message translates to:
+  /// **'密码短语（可选）'**
+  String get keyPassphrase;
+
+  /// No description provided for @keyPassphraseHelper.
+  ///
+  /// In zh, this message translates to:
+  /// **'留空表示无口令；填写后每次使用需输入'**
+  String get keyPassphraseHelper;
+
+  /// No description provided for @keyAlgorithmLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'算法'**
+  String get keyAlgorithmLabel;
+
+  /// No description provided for @generateKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成密钥对'**
+  String get generateKey;
+
+  /// No description provided for @privateKeyPath.
+  ///
+  /// In zh, this message translates to:
+  /// **'私钥路径'**
+  String get privateKeyPath;
+
+  /// No description provided for @publicKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'公钥'**
+  String get publicKey;
+
+  /// No description provided for @copyPublicKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制公钥'**
+  String get copyPublicKey;
+
+  /// No description provided for @fillIdentityFile.
+  ///
+  /// In zh, this message translates to:
+  /// **'填入当前配置'**
+  String get fillIdentityFile;
+
+  /// No description provided for @keygenSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'密钥对生成成功'**
+  String get keygenSuccess;
+
+  /// No description provided for @keygenFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'密钥生成失败: {message}'**
+  String keygenFailed(Object message);
+
+  /// No description provided for @keygenUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'未检测到 ssh-keygen，请先安装 OpenSSH 客户端'**
+  String get keygenUnavailable;
+
+  /// No description provided for @keyExistsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'密钥已存在'**
+  String get keyExistsTitle;
+
+  /// No description provided for @keyExistsContent.
+  ///
+  /// In zh, this message translates to:
+  /// **'已存在同名密钥：{path}\n是否覆盖？'**
+  String keyExistsContent(Object path);
+
+  /// No description provided for @passphraseReminder.
+  ///
+  /// In zh, this message translates to:
+  /// **'已设置密码短语，每次使用将要求输入'**
+  String get passphraseReminder;
+
+  /// No description provided for @fillIdentityFileDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'已填入 IdentityFile 行'**
+  String get fillIdentityFileDone;
+
+  /// No description provided for @publicKeyCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'公钥已复制到剪贴板'**
+  String get publicKeyCopied;
+
+  /// No description provided for @keygenDetecting.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在检测 ssh-keygen 可用性…'**
+  String get keygenDetecting;
+
+  /// No description provided for @keygenDetectedAt.
+  ///
+  /// In zh, this message translates to:
+  /// **'已检测到 ssh-keygen：{path}'**
+  String keygenDetectedAt(Object path);
+
+  /// No description provided for @keygenNotFound.
+  ///
+  /// In zh, this message translates to:
+  /// **'未检测到 ssh-keygen，请安装 OpenSSH 客户端或指定路径'**
+  String get keygenNotFound;
+
+  /// No description provided for @keygenPathLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'自定义 ssh-keygen 路径'**
+  String get keygenPathLabel;
+
+  /// No description provided for @keygenPathHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'留空自动检测（PATH / 常见安装位置）'**
+  String get keygenPathHint;
+
+  /// No description provided for @keygenVerifyBtn.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证'**
+  String get keygenVerifyBtn;
+
+  /// No description provided for @keygenResetBtn.
+  ///
+  /// In zh, this message translates to:
+  /// **'恢复自动检测'**
+  String get keygenResetBtn;
+
+  /// No description provided for @keygenBrowseBtn.
+  ///
+  /// In zh, this message translates to:
+  /// **'浏览'**
+  String get keygenBrowseBtn;
+
+  /// No description provided for @keygenPathValid.
+  ///
+  /// In zh, this message translates to:
+  /// **'ssh-keygen 路径有效：{path}'**
+  String keygenPathValid(Object path);
+
+  /// No description provided for @keygenPathInvalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'ssh-keygen 路径无效：{path}'**
+  String keygenPathInvalid(Object path);
+
+  /// No description provided for @logSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'日志设置'**
+  String get logSettings;
+
+  /// No description provided for @logSettingsSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'日志级别与存储位置'**
+  String get logSettingsSubtitle;
+
+  /// No description provided for @logLevel.
+  ///
+  /// In zh, this message translates to:
+  /// **'日志级别'**
+  String get logLevel;
+
+  /// No description provided for @logLevelTrace.
+  ///
+  /// In zh, this message translates to:
+  /// **'TRACE（最详细）'**
+  String get logLevelTrace;
+
+  /// No description provided for @logLevelDebug.
+  ///
+  /// In zh, this message translates to:
+  /// **'DEBUG（调试）'**
+  String get logLevelDebug;
+
+  /// No description provided for @logLevelInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'INFO（信息，默认）'**
+  String get logLevelInfo;
+
+  /// No description provided for @logLevelWarn.
+  ///
+  /// In zh, this message translates to:
+  /// **'WARN（警告）'**
+  String get logLevelWarn;
+
+  /// No description provided for @logLevelError.
+  ///
+  /// In zh, this message translates to:
+  /// **'ERROR（仅错误）'**
+  String get logLevelError;
+
+  /// No description provided for @logFileLocation.
+  ///
+  /// In zh, this message translates to:
+  /// **'日志目录'**
+  String get logFileLocation;
+
+  /// No description provided for @onboardingDemoButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'体验示例配置'**
+  String get onboardingDemoButton;
+
+  /// No description provided for @onboardingDemoHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'无需注册账号，一键导入 2 个示例配置即可体验全部功能'**
+  String get onboardingDemoHint;
+
+  /// No description provided for @onboardingDemoDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例配置已导入，点击“完成”开始体验'**
+  String get onboardingDemoDone;
+
+  /// No description provided for @demoProfileWorkName.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例-工作账号'**
+  String get demoProfileWorkName;
+
+  /// No description provided for @demoProfilePersonalName.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例-个人账号'**
+  String get demoProfilePersonalName;
 }
 
 class _AppLocalizationsDelegate

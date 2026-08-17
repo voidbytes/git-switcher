@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'app_localizations.dart';
+import 'core_messages.dart';
 
 /// 全局本地化访问器。
 ///
@@ -18,6 +19,11 @@ class L {
   static void initialize(AppLocalizations l10n) {
     _l10n = l10n;
   }
+
+  /// 测试辅助：直接注入本地化实例而不触发界面刷新。
+  static void debugSetLocalization(AppLocalizations l10n) {
+    _l10n = l10n;
+  }
 }
 
 /// 当前生效的 Locale，供根 MaterialApp 监听以在运行时切换语言。
@@ -29,9 +35,65 @@ void applyLocale(String? code) {
   final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
   final locale = resolveLocale(code, systemLocale);
   localeNotifier.value = locale;
-  L.initialize(lookupAppLocalizations(locale));
+  final l10n = lookupAppLocalizations(locale);
+  L.initialize(l10n);
+  // 同步核心服务消息源（GitService / FileService），保持 GUI 文案一致。
+  Msg.use(AppLocalizationsCoreMessages(l10n));
   // 同步原生窗口标题栏文本，使其随语言切换。
   windowManager.setTitle(L.of.appTitle);
+}
+
+/// 将 GUI 的 AppLocalizations 桥接为纯 Dart 核心服务消息源。
+class AppLocalizationsCoreMessages implements CoreMessages {
+  AppLocalizationsCoreMessages(this._l10n);
+
+  final AppLocalizations _l10n;
+
+  @override
+  String get gitBackupDone => _l10n.gitBackupDone;
+
+  @override
+  String get sshBackupDone => _l10n.sshBackupDone;
+
+  @override
+  String get gitConfigUpdated => _l10n.gitConfigUpdated;
+
+  @override
+  String get gitConfigUpdateFailed => _l10n.gitConfigUpdateFailed;
+
+  @override
+  String get sshConfigUpdated => _l10n.sshConfigUpdated;
+
+  @override
+  String get sshConfigUpdateFailed => _l10n.sshConfigUpdateFailed;
+
+  @override
+  String get configRolledBack => _l10n.configRolledBack;
+
+  @override
+  String get sshNoIdentityFile => _l10n.sshNoIdentityFile;
+
+  @override
+  String get undoFailed => _l10n.undoFailed;
+
+  @override
+  String get verifyGitMismatch => _l10n.verifyGitMismatch;
+
+  @override
+  String get backupNothing => _l10n.backupNothing;
+
+  @override
+  String keyFileNotExist(Object path) => _l10n.keyFileNotExist(path);
+
+  @override
+  String keyPermissionIncorrect(Object permissions) =>
+      _l10n.keyPermissionIncorrect(permissions);
+
+  @override
+  String get keyPermissionCheckFailed => _l10n.keyPermissionCheckFailed;
+
+  @override
+  String verifySshFailed(Object host) => _l10n.verifySshFailed(host);
 }
 
 /// 应用支持的语言代码（与 AppConfig.languageCode 及 ARB 文件名对应）。

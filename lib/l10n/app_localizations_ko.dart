@@ -450,4 +450,290 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get backupNothing => '백업할 구성이 없습니다';
+
+  @override
+  String get sshNoIdentityFile => 'SSH 구성에서 IdentityFile 행을 찾을 수 없습니다';
+
+  @override
+  String get verifyGitMismatch =>
+      'Git 신원 확인 실패: user.name 또는 user.email이 대상 구성과 일치하지 않습니다';
+
+  @override
+  String verifySshFailed(Object host) {
+    return 'SSH 확인 실패: $host';
+  }
+
+  @override
+  String get undoFailed => '실행 취소 실패';
+
+  @override
+  String get importSystemGit => '시스템 .gitconfig 가져오기';
+
+  @override
+  String get importSystemSsh => '시스템 .ssh/config 가져오기';
+
+  @override
+  String get sshConfigContent => 'SSH 구성 내용';
+
+  @override
+  String get sshConfigHelper => '.ssh/config 내용을 붙여넣기 (전체 파일 전환)';
+
+  @override
+  String get enterSshConfig => 'SSH를 사용하는 경우 구성 내용이 필요합니다';
+
+  @override
+  String get quickCreateTitle => '빠른 생성';
+
+  @override
+  String get fromTemplate => '템플릿에서';
+
+  @override
+  String get fromExistingProfile => '기존 프로필 복사';
+
+  @override
+  String get generateKeyPair => '키 쌍 생성';
+
+  @override
+  String get sshPreviewTitle => '~/.ssh/config에 쓸 내용';
+
+  @override
+  String get templateProviderTitle => '공급자 선택';
+
+  @override
+  String get providerGithub => 'GitHub';
+
+  @override
+  String get providerGitlab => 'GitLab';
+
+  @override
+  String get providerGitee => 'Gitee';
+
+  @override
+  String get providerBlank => '비어 있음';
+
+  @override
+  String get templateModeTitle => '연결 모드';
+
+  @override
+  String get modeDirect => '직접';
+
+  @override
+  String get modeProxy => '프록시';
+
+  @override
+  String get proxyAddress => '프록시 주소';
+
+  @override
+  String get proxyAddressHint => '비워 두면 기본 127.0.0.1:7890 사용';
+
+  @override
+  String get templateGenerated => 'SSH 구성 템플릿 생성됨';
+
+  @override
+  String get selectProfileToCopy => '복사할 프로필 선택';
+
+  @override
+  String get copyProfileSuffix => ' (복사)';
+
+  @override
+  String get confirm => '확인';
+
+  @override
+  String get importSshConfigSuccess => '현재 .ssh/config 구성 가져오기 성공';
+
+  @override
+  String get importSshConfigFailed => '.ssh/config 파일을 찾을 수 없거나 읽을 수 없습니다';
+
+  @override
+  String get onboardingWelcome => 'Git Switcher에 오신 것을 환영합니다';
+
+  @override
+  String get onboardingSubtitle => '여러 Git / SSH 신원을 한 번의 클릭으로 관리하고 전환';
+
+  @override
+  String get onboardingNameHint => '이 프로필의 이름 지정 (예: 회사 계정)';
+
+  @override
+  String get onboardingImportDone => '현재 시스템 구성을 가져왔습니다. 저장 전에 수정할 수 있습니다';
+
+  @override
+  String get onboardingImport => '현재 시스템 구성 가져오기';
+
+  @override
+  String get onboardingSkip => '건너뛰기';
+
+  @override
+  String get onboardingFinish => '완료';
+
+  @override
+  String get overwriteSshTitle => 'SSH 구성 덮어쓰기 확인';
+
+  @override
+  String get overwriteSshContent =>
+      '이 도구로 관리되지 않는 SSH 구성을 덮어쓰려고 합니다. 계속하시겠습니까?';
+
+  @override
+  String get switchVerified => '전환 성공, 신원 확인됨';
+
+  @override
+  String get switchWrittenNotVerified => '구성이 기록되었지만 확인에 실패했습니다';
+
+  @override
+  String get undoSuccess => '이전 구성으로 되돌렸습니다';
+
+  @override
+  String get undoNothing => '실행 취소할 항목이 없습니다';
+
+  @override
+  String get undoLastSwitch => '마지막 전환 실행 취소';
+
+  @override
+  String get keyManagementTitle => '키 관리';
+
+  @override
+  String get keyIdentifier => '식별자 (영문)';
+
+  @override
+  String get keyIdentifierHelper => '영문자, 숫자, - 및 _만 허용되며 파일 이름에 사용됩니다';
+
+  @override
+  String get keyIdentifierInvalid => '식별자는 영문자, 숫자, - 및 _만 허용합니다';
+
+  @override
+  String get keyEmail => '이메일 (선택)';
+
+  @override
+  String get keyEmailInvalid => '이메일 형식이 올바르지 않습니다. @를 포함해야 합니다';
+
+  @override
+  String get keyPassphrase => '암호 문구 (선택)';
+
+  @override
+  String get keyPassphraseHelper => '비워 두면 암호 없음; 설정하면 매번 사용 시 필요합니다';
+
+  @override
+  String get keyAlgorithmLabel => '알고리즘';
+
+  @override
+  String get generateKey => '키 쌍 생성';
+
+  @override
+  String get privateKeyPath => '개인 키 경로';
+
+  @override
+  String get publicKey => '공개 키';
+
+  @override
+  String get copyPublicKey => '공개 키 복사';
+
+  @override
+  String get fillIdentityFile => '현재 구성에 채우기';
+
+  @override
+  String get keygenSuccess => '키 쌍 생성 성공';
+
+  @override
+  String keygenFailed(Object message) {
+    return '키 생성 실패: $message';
+  }
+
+  @override
+  String get keygenUnavailable => 'ssh-keygen을 찾을 수 없습니다. OpenSSH 클라이언트를 설치하세요';
+
+  @override
+  String get keyExistsTitle => '키가 이미 존재합니다';
+
+  @override
+  String keyExistsContent(Object path) {
+    return '키가 이미 존재합니다: $path\n덮어쓸까요?';
+  }
+
+  @override
+  String get passphraseReminder => '암호 문구가 설정되었습니다. 매번 사용 시 필요합니다';
+
+  @override
+  String get fillIdentityFileDone => 'IdentityFile 행이 채워졌습니다';
+
+  @override
+  String get publicKeyCopied => '공개 키가 클립보드에 복사되었습니다';
+
+  @override
+  String get keygenDetecting => 'ssh-keygen 사용 가능 여부 확인 중…';
+
+  @override
+  String keygenDetectedAt(Object path) {
+    return 'ssh-keygen 발견됨: $path';
+  }
+
+  @override
+  String get keygenNotFound =>
+      'ssh-keygen을 찾을 수 없습니다. OpenSSH 클라이언트를 설치하거나 경로를 지정하세요';
+
+  @override
+  String get keygenPathLabel => '사용자 지정 ssh-keygen 경로';
+
+  @override
+  String get keygenPathHint => '비워두면 자동 감지 (PATH / 일반적인 설치 위치)';
+
+  @override
+  String get keygenVerifyBtn => '확인';
+
+  @override
+  String get keygenResetBtn => '자동 감지로 초기화';
+
+  @override
+  String get keygenBrowseBtn => '찾아보기';
+
+  @override
+  String keygenPathValid(Object path) {
+    return '유효한 ssh-keygen 경로: $path';
+  }
+
+  @override
+  String keygenPathInvalid(Object path) {
+    return '잘못된 ssh-keygen 경로: $path';
+  }
+
+  @override
+  String get logSettings => '로그 설정';
+
+  @override
+  String get logSettingsSubtitle => '로그 수준 및 저장 위치';
+
+  @override
+  String get logLevel => '로그 수준';
+
+  @override
+  String get logLevelTrace => 'TRACE (가장 상세)';
+
+  @override
+  String get logLevelDebug => 'DEBUG (디버그)';
+
+  @override
+  String get logLevelInfo => 'INFO (기본값)';
+
+  @override
+  String get logLevelWarn => 'WARN (경고)';
+
+  @override
+  String get logLevelError => 'ERROR (오류만)';
+
+  @override
+  String get logFileLocation => '로그 디렉터리';
+
+  @override
+  String get onboardingDemoButton => '예시 프로필 사용해 보기';
+
+  @override
+  String get onboardingDemoHint =>
+      '계정이 필요 없습니다 — 예시 프로필 2개를 가져와 회원가입 없이 모든 기능을 체험해 보세요';
+
+  @override
+  String get onboardingDemoDone => '예시 프로필이 가져와졌습니다 — 완료를 클릭해 시작하세요';
+
+  @override
+  String get demoProfileWorkName => '예시-업무 계정';
+
+  @override
+  String get demoProfilePersonalName => '예시-개인 계정';
 }

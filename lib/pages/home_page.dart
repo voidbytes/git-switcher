@@ -3,7 +3,7 @@ import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
 import '../services/config_service.dart';
 import '../services/git_service.dart';
-import '../services/ssh_config_service.dart';
+import 'key_gen_page.dart';
 import 'profile_edit_page.dart';
 import 'backup_page.dart';
 import 'settings_page.dart';
@@ -18,7 +18,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _configService = ConfigService.instance;
   final _gitService = GitService.instance;
-  final _sshConfigService = SshConfigService.instance;
   bool _isLoading = false;
   Profile? _activeProfile;
 
@@ -36,21 +35,10 @@ class _HomePageState extends State<HomePage> {
     try {
       final activeProfile = await _gitService.findActiveProfile();
       if (mounted) {
-        setState(() {
-          _activeProfile = activeProfile;
-        });
+        setState(() => _activeProfile = activeProfile);
       }
     } catch (e) {
-      if (mounted) {
-        final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.switchFailedWithError(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      debugPrintStack();
+      debugPrint('识别活跃配置失败: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -58,49 +46,36 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _switchProfile(Profile profile) async {
-    setState(() => _isLoading = true);
+  Future<void> _switchProfile(Profile profile) async {
     final l10n = AppLocalizations.of(context);
+    setState(() => _isLoading = true);
 
     try {
-      if (profile.useSsh) {
-        final conflictPath = await _sshConfigService.getSshConfigConflict(
-          profile.host,
-          profile.identityFile,
-        );
-
-        if (conflictPath != null && mounted) {
-          final confirmed = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(l10n.sshConfigConflictTitle),
-              content: Text(
-                l10n.sshConfigConflictContent(
-                  profile.host,
-                  conflictPath,
-                  profile.identityFile,
+      // 覆盖确认：仅 use_ssh 且当前 ~/.ssh/config 非本工具管理时。
+      if (profile.useSsh && await _gitService.isUnmanagedSshConfig()) {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(l10n.overwriteSshTitle),
+            content: Text(l10n.overwriteSshContent),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  l10n.continueSwitch,
+                  style: const TextStyle(color: Colors.orange),
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text(l10n.cancel),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(
-                    l10n.continueSwitch,
-                    style: const TextStyle(color: Colors.orange),
-                  ),
-                ),
-              ],
-            ),
-          );
-
-          if (confirmed != true) {
-            setState(() => _isLoading = false);
-            return;
-          }
+            ],
+          ),
+        );
+        if (confirmed != true) {
+          setState(() => _isLoading = false);
+          return;
         }
       }
 
@@ -110,34 +85,55 @@ class _HomePageState extends State<HomePage> {
         _configService.appConfig.maxBackupCount,
       );
 
-      if (mounted) {
-        final success = result['git'] == true && result['ssh'] == true;
-        final messages = result['messages'] as List<String>;
+      if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? l10n.switchSuccess
-                  : l10n.switchFailedWithMessages(messages.join('\n')),
-            ),
-            backgroundColor: success ? Colors.green : Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+      if (result.success) {
+        // 成功 → 自动验证。
+        final verify = await _gitService.verifyAfterSwitch(profile);
+        final verified = verify['verified'] == true;
+        _showMessage(
+          verified ? l10n.switchVerified : l10n.switchWrittenNotVerified,
+          verified ? Colors.green : Colors.orange,
+        );
+      } else {
+        _showMessage(
+          l10n.switchFailedWithMessages(result.messages.join('\n')),
+          Colors.red,
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.switchFailedWithError(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _showMessage(l10n.switchFailedWithError(e.toString()), Colors.red);
       }
     } finally {
       _checkActiveProfile();
     }
+  }
+
+  Future<void> _undoLastSwitch() async {
+    final l10n = AppLocalizations.of(context);
+    final (done, error) = await _gitService.undoLastSwitch();
+    if (mounted) {
+      if (done) {
+        _showMessage(l10n.undoSuccess, Colors.green);
+      } else if (error != null) {
+        _showMessage(error, Colors.red);
+      } else {
+        _showMessage(l10n.undoNothing, Colors.orange);
+      }
+    }
+    _checkActiveProfile();
+  }
+
+  void _showMessage(String message, Color color) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -170,6 +166,13 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          FloatingActionButton(
+            onPressed: () => _openKeyGen(),
+            heroTag: "keygen",
+            tooltip: l10n.keyManagementTitle,
+            child: const Icon(Icons.vpn_key),
+          ),
+          const SizedBox(height: 16),
           FloatingActionButton(
             onPressed: () => _openBackupPage(),
             heroTag: "backup",
@@ -208,6 +211,8 @@ class _HomePageState extends State<HomePage> {
       configMatched = false;
     }
 
+    final hasSnapshot = _configService.appConfig.lastSwitchSnapshot != null;
+
     return Card(
       margin: const EdgeInsets.all(16),
       color: cardColor,
@@ -238,10 +243,16 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            if (!configMatched) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                OutlinedButton.icon(
+                  onPressed: hasSnapshot ? _undoLastSwitch : null,
+                  icon: const Icon(Icons.undo, size: 18),
+                  label: Text(l10n.undoLastSwitch),
+                ),
+                if (!configMatched) ...[
+                  const SizedBox(width: 8),
                   OutlinedButton.icon(
                     onPressed: _backupCurrentConfig,
                     icon: const Icon(Icons.backup, size: 18),
@@ -254,8 +265,8 @@ class _HomePageState extends State<HomePage> {
                     label: Text(l10n.viewDiff),
                   ),
                 ],
-              ),
-            ],
+              ],
+            ),
           ],
         ),
       ),
@@ -265,13 +276,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _backupCurrentConfig() async {
     final messages = await _gitService.backupCurrentConfig();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(messages.join('\n')),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      _showMessage(messages.join('\n'), Colors.green);
     }
   }
 
@@ -279,65 +284,38 @@ class _HomePageState extends State<HomePage> {
     final l10n = AppLocalizations.of(context);
     final profiles = _configService.profiles;
     if (profiles.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.noConfigsToCompare),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
+      _showMessage(l10n.noConfigsToCompare, Colors.orange);
       return;
     }
-
-    // 收集每个配置的差异摘要
-    final diffs = <Profile, List<String>>{};
-    for (final profile in profiles) {
-      final result = await _gitService.getConfigDiff(profile);
-      final differences = (result['differences'] as List).cast<String>();
-      diffs[profile] = differences;
-    }
-
     if (!mounted) return;
 
-    showDialog<void>(
+    Profile? selected = _activeProfile ?? profiles.first;
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.viewConfigDiffTitle),
         content: SizedBox(
           width: double.maxFinite,
-          child: ListView(
-            shrinkWrap: true,
-            children: diffs.entries.map((entry) {
-              final profile = entry.key;
-              final differences = entry.value;
-              return ListTile(
-                dense: true,
-                leading: Icon(
-                  differences.isEmpty
-                      ? Icons.check_circle
-                      : Icons.error_outline,
-                  color: differences.isEmpty ? Colors.green : Colors.orange,
-                ),
-                title: Text(
-                  profile.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  differences.isEmpty
-                      ? l10n.configMatches
-                      : differences.join('\n'),
-                  style: const TextStyle(fontSize: 12),
-                ),
-                onTap: () => _showProfileDiffDetail(profile),
-              );
-            }).toList(),
+          child: DropdownButton<Profile>(
+            value: selected,
+            isExpanded: true,
+            items: profiles
+                .map((p) => DropdownMenuItem(value: p, child: Text(p.name)))
+                .toList(),
+            onChanged: (v) => selected = v,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.close),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (selected != null) _showProfileDiffDetail(selected!);
+            },
+            child: Text(l10n.confirm),
           ),
         ],
       ),
@@ -347,9 +325,12 @@ class _HomePageState extends State<HomePage> {
   Future<void> _showProfileDiffDetail(Profile profile) async {
     final l10n = AppLocalizations.of(context);
     final result = await _gitService.getConfigDiff(profile);
-    final differences = (result['differences'] as List).cast<String>();
-    final currentGitConfig = result['currentGitConfig'] as String?;
-    final profileGitConfig = result['profileGitConfig'] as String?;
+    final gitDiff = (result['gitDiff'] as List).cast<ConfigDiffEntry>();
+    final sshDiff = (result['sshDiff'] as List).cast<ConfigDiffEntry>();
+    final currentGit = result['currentGitConfig'] as String?;
+    final profileGit = result['profileGitConfig'] as String?;
+    final currentSsh = result['currentSshConfig'] as String?;
+    final profileSsh = result['profileSshConfig'] as String?;
 
     if (!mounted) return;
 
@@ -359,75 +340,28 @@ class _HomePageState extends State<HomePage> {
         title: Text(l10n.profileDiffTitle(profile.name)),
         content: SizedBox(
           width: double.maxFinite,
-          height: 400,
+          height: 480,
           child: DefaultTabController(
-            length: 2,
-            child: differences.isEmpty
-                ? Column(
+            length: profile.useSsh ? 2 : 1,
+            child: Column(
+              children: [
+                TabBar(
+                  tabs: [
+                    Tab(text: l10n.gitConfigType),
+                    if (profile.useSsh) Tab(text: l10n.sshConfigType),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
                     children: [
-                      Text(
-                        l10n.configMatchesFull,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: _buildConfigContentView(
-                          profileGitConfig ?? l10n.noTargetConfig,
-                        ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.diffItems,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              ...differences.map(
-                                (d) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
-                                  child: Text(
-                                    '• $d',
-                                    style: const TextStyle(
-                                      color: Colors.orange,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TabBar(
-                        tabs: [
-                          Tab(text: l10n.currentConfigTab),
-                          Tab(text: l10n.targetConfigTab),
-                        ],
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          children: [
-                            _buildConfigContentView(
-                              currentGitConfig ?? l10n.noCurrentGitConfig,
-                            ),
-                            _buildConfigContentView(
-                              profileGitConfig ?? l10n.noTargetConfig,
-                            ),
-                          ],
-                        ),
-                      ),
+                      _buildDiffContent(l10n, gitDiff, currentGit, profileGit),
+                      if (profile.useSsh)
+                        _buildDiffContent(l10n, sshDiff, currentSsh, profileSsh),
                     ],
                   ),
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
@@ -440,20 +374,88 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildConfigContentView(String content) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: SingleChildScrollView(
-        child: Text(
-          content,
-          style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+  Widget _buildDiffContent(
+    AppLocalizations l10n,
+    List<ConfigDiffEntry> diff,
+    String? current,
+    String? target,
+  ) {
+    return Column(
+      children: [
+        if (diff.isEmpty)
+          Expanded(
+            child: Center(
+              child: Text(
+                l10n.configMatchesFull,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          )
+        else
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(8),
+              children: diff.map((d) {
+                final Color color;
+                final String text;
+                if (d.oldContent.isEmpty) {
+                  color = Colors.green;
+                  text = '+ ${d.newContent}';
+                } else if (d.newContent.isEmpty) {
+                  color = Colors.red;
+                  text = '- ${d.oldContent}';
+                } else {
+                  color = Colors.orange;
+                  text = '~ ${d.oldContent}  →  ${d.newContent}';
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Text(
+                    '$text  (L${d.lineNumber})',
+                    style: TextStyle(color: color, fontSize: 12),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildConfigView(l10n.currentConfigTab, current ?? ''),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildConfigView(l10n.targetConfigTab, target ?? ''),
+            ),
+          ],
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget _buildConfigView(String title, String content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Container(
+          height: 120,
+          width: double.infinity,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: SingleChildScrollView(
+            child: Text(
+              content,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -497,8 +499,7 @@ class _HomePageState extends State<HomePage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (profile.host.isNotEmpty)
-                  Text(l10n.platformLabel(profile.host)),
+                Text(_gitSummary(profile.gitconfig)),
                 Text(
                   profile.useSsh
                       ? l10n.sshEnabledStatus
@@ -527,6 +528,18 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+
+  String _gitSummary(String gitconfig) {
+    final name = RegExp(
+      r'^\s*name\s*=\s*(.+)$',
+      multiLine: true,
+    ).firstMatch(gitconfig)?.group(1)?.trim();
+    final email = RegExp(
+      r'^\s*email\s*=\s*(.+)$',
+      multiLine: true,
+    ).firstMatch(gitconfig)?.group(1)?.trim();
+    return '${name ?? '(无 name)'} <${email ?? ''}>';
   }
 
   void _createProfile() async {
@@ -576,11 +589,9 @@ class _HomePageState extends State<HomePage> {
     if (confirmed == true) {
       final success = await _configService.deleteProfile(profile.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? l10n.deleteSuccess : l10n.deleteFailed),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
+        _showMessage(
+          success ? l10n.deleteSuccess : l10n.deleteFailed,
+          success ? Colors.green : Colors.red,
         );
         if (success) {
           setState(() {});
@@ -595,6 +606,12 @@ class _HomePageState extends State<HomePage> {
       context,
     ).push(MaterialPageRoute(builder: (context) => const BackupPage()));
     _checkActiveProfile();
+  }
+
+  void _openKeyGen() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const KeyGenPage()));
   }
 
   void _openSettings() async {

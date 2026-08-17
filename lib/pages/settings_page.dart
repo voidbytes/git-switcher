@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/localization_service.dart';
 import '../services/config_service.dart';
+import '../services/log_service.dart';
+import '../services/path_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -19,6 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _isLoading = false;
   bool _minimizeToTray = false;
   String _languageCode = 'system';
+  String _logLevel = 'info';
 
   @override
   void initState() {
@@ -28,6 +31,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _maxBackupController.text = config.maxBackupCount.toString();
     _minimizeToTray = config.minimizeToTray;
     _languageCode = config.languageCode ?? 'system';
+    _logLevel = config.logLevel ?? 'info';
   }
 
   @override
@@ -184,6 +188,73 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.logSettings,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.logSettingsSubtitle,
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: _logLevel,
+                    decoration: InputDecoration(
+                      labelText: l10n.logLevel,
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'trace',
+                        child: Text(l10n.logLevelTrace),
+                      ),
+                      DropdownMenuItem(
+                        value: 'debug',
+                        child: Text(l10n.logLevelDebug),
+                      ),
+                      DropdownMenuItem(
+                        value: 'info',
+                        child: Text(l10n.logLevelInfo),
+                      ),
+                      DropdownMenuItem(
+                        value: 'warn',
+                        child: Text(l10n.logLevelWarn),
+                      ),
+                      DropdownMenuItem(
+                        value: 'error',
+                        child: Text(l10n.logLevelError),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) setState(() => _logLevel = value);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n.logFileLocation, style: const TextStyle(fontSize: 14)),
+                  const SizedBox(height: 4),
+                  SelectableText(
+                    PathService.instance.logsDir,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           const SizedBox(height: 32),
 
           Row(
@@ -234,10 +305,13 @@ class _SettingsPageState extends State<SettingsPage> {
         maxBackupCount: maxBackup,
         minimizeToTray: _minimizeToTray,
         languageCode: _languageCode == 'system' ? null : _languageCode,
+        logLevel: _logLevel,
       );
 
       final success = await _configService.updateAppConfig(newConfig);
       applyLocale(newConfig.languageCode);
+      // 立即应用新的日志级别，无需重启。
+      LogService.instance.setLevel(LogLevel.fromString(_logLevel));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

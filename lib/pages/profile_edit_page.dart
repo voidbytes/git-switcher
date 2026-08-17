@@ -1,12 +1,13 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import '../l10n/app_localizations.dart';
 import '../models/profile.dart';
 import '../services/config_service.dart';
 import '../services/file_service.dart';
 import '../services/path_service.dart';
+import '../services/ssh_template_service.dart';
+import 'key_gen_page.dart';
 
+/// 新建/编辑配置页（规格 5.2）。
 class ProfileEditPage extends StatefulWidget {
   final Profile? profile;
 
@@ -20,9 +21,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _gitconfigController = TextEditingController();
-  final _hostController = TextEditingController();
-  final _identityFileController = TextEditingController();
-  final _sshPortController = TextEditingController();
+  final _sshconfigController = TextEditingController();
 
   bool _useSsh = false;
   bool _isLoading = false;
@@ -34,12 +33,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       _nameController.text = widget.profile!.name;
       _gitconfigController.text = widget.profile!.gitconfig;
       _useSsh = widget.profile!.useSsh;
-      _hostController.text = widget.profile!.host;
-      _identityFileController.text = widget.profile!.identityFile;
-      _sshPortController.text = widget.profile!.sshPort?.toString() ?? '';
-    } else {
-      _hostController.text = 'github.com';
-      _sshPortController.text = '443';
+      _sshconfigController.text = widget.profile!.sshconfig;
     }
   }
 
@@ -47,9 +41,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   void dispose() {
     _nameController.dispose();
     _gitconfigController.dispose();
-    _hostController.dispose();
-    _identityFileController.dispose();
-    _sshPortController.dispose();
+    _sshconfigController.dispose();
     super.dispose();
   }
 
@@ -68,6 +60,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   }
 
   Widget _buildForm(AppLocalizations l10n) {
+    final isNew = widget.profile == null;
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -75,6 +68,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (isNew) ...[
+              _buildQuickCreateSection(l10n),
+              const Divider(),
+            ],
             TextFormField(
               controller: _nameController,
               decoration: InputDecoration(
@@ -98,11 +95,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),
-                TextButton.icon(
-                  icon: const Icon(Icons.download),
-                  label: Text(l10n.importExistingConfig),
-                  onPressed: _importGitConfig,
-                ),
+                if (isNew)
+                  TextButton.icon(
+                    icon: const Icon(Icons.download),
+                    label: Text(l10n.importSystemGit),
+                    onPressed: _importGitConfig,
+                  ),
               ],
             ),
             TextFormField(
@@ -112,6 +110,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 helperText: l10n.gitconfigHelper,
               ),
               maxLines: 8,
+              style: const TextStyle(fontFamily: 'monospace'),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return l10n.enterGitConfig;
@@ -130,73 +129,39 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             ),
             if (_useSsh) ...[
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _hostController,
-                decoration: InputDecoration(
-                  labelText: l10n.hostname,
-                  border: const OutlineInputBorder(),
-                  helperText: l10n.hostnameHelper,
-                ),
-                validator: _useSsh
-                    ? (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return l10n.hostnameRequired;
-                        }
-                        return null;
-                      }
-                    : null,
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _sshPortController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: l10n.sshPort,
-                  border: const OutlineInputBorder(),
-                  helperText: l10n.sshPortHelper,
-                ),
-                validator: _useSsh
-                    ? (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return null;
-                        }
-                        final port = int.tryParse(value.trim());
-                        if (port == null || port < 1 || port > 65535) {
-                          return l10n.portRange;
-                        }
-                        return null;
-                      }
-                    : null,
-              ),
-              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      controller: _identityFileController,
-                      decoration: InputDecoration(
-                        labelText: l10n.sshPrivateKeyPath,
-                        border: const OutlineInputBorder(),
-                        helperText: l10n.privateKeyHelper,
-                      ),
-                      validator: _useSsh
-                          ? (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return l10n.privateKeyRequired;
-                              }
-                              return null;
-                            }
-                          : null,
+                    child: Text(
+                      l10n.sshConfigContent,
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.folder_open),
-                    onPressed: _pickPrivateKeyFile,
-                    tooltip: l10n.pickPrivateKeyTooltip,
-                  ),
+                  if (isNew)
+                    TextButton.icon(
+                      icon: const Icon(Icons.download),
+                      label: Text(l10n.importSystemSsh),
+                      onPressed: _importSshConfig,
+                    ),
                 ],
               ),
+              TextFormField(
+                controller: _sshconfigController,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  helperText: l10n.sshConfigHelper,
+                ),
+                maxLines: 10,
+                style: const TextStyle(fontFamily: 'monospace'),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return l10n.enterSshConfig;
+                  }
+                  return null;
+                },
+              ),
+              if (_sshconfigController.text.trim().isNotEmpty)
+                _buildSshPreview(l10n),
             ],
             const SizedBox(height: 32),
             Row(
@@ -222,57 +187,280 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     );
   }
 
+  /// 快捷创建区（仅新建时显示，规格 5.2）。
+  Widget _buildQuickCreateSection(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.quickCreateTitle,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              icon: const Icon(Icons.auto_awesome),
+              label: Text(l10n.fromTemplate),
+              onPressed: _openTemplateSelector,
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.copy_all),
+              label: Text(l10n.fromExistingProfile),
+              onPressed: _copyExistingProfile,
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.vpn_key),
+              label: Text(l10n.generateKeyPair),
+              onPressed: _openKeyGen,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildSshPreview(AppLocalizations l10n) {
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.sshPreviewTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          SelectableText(
+            _sshconfigController.text,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 模板选择器（规格 5.2.1）。
+  Future<void> _openTemplateSelector() async {
+    final l10n = AppLocalizations.of(context);
+    SshProvider? provider;
+    ProxyMode mode = ProxyMode.direct;
+    final proxyController = TextEditingController(text: '127.0.0.1:7890');
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(l10n.templateProviderTitle),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ChoiceChip(
+                      label: Text(l10n.providerGithub),
+                      selected: provider == SshProvider.github,
+                      onSelected: (_) =>
+                          setDialogState(() => provider = SshProvider.github),
+                    ),
+                    ChoiceChip(
+                      label: Text(l10n.providerGitlab),
+                      selected: provider == SshProvider.gitlab,
+                      onSelected: (_) =>
+                          setDialogState(() => provider = SshProvider.gitlab),
+                    ),
+                    ChoiceChip(
+                      label: Text(l10n.providerGitee),
+                      selected: provider == SshProvider.gitee,
+                      onSelected: (_) =>
+                          setDialogState(() => provider = SshProvider.gitee),
+                    ),
+                    ChoiceChip(
+                      label: Text(l10n.providerBlank),
+                      selected: provider == SshProvider.blank,
+                      onSelected: (_) =>
+                          setDialogState(() => provider = SshProvider.blank),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(l10n.templateModeTitle,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                SegmentedButton<ProxyMode>(
+                  segments: [
+                    ButtonSegment(
+                      value: ProxyMode.direct,
+                      label: Text(l10n.modeDirect),
+                    ),
+                    ButtonSegment(
+                      value: ProxyMode.proxy,
+                      label: Text(l10n.modeProxy),
+                    ),
+                  ],
+                  selected: {mode},
+                  onSelectionChanged: (s) =>
+                      setDialogState(() => mode = s.first),
+                ),
+                if (mode == ProxyMode.proxy) ...[
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: proxyController,
+                    decoration: InputDecoration(
+                      labelText: l10n.proxyAddress,
+                      border: const OutlineInputBorder(),
+                      helperText: l10n.proxyAddressHint,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                if (provider == null) return;
+                final identityFile =
+                    provider == SshProvider.github
+                        ? '~/.ssh/id_ed25519_github'
+                        : provider == SshProvider.gitlab
+                        ? '~/.ssh/id_ed25519_gitlab'
+                        : provider == SshProvider.gitee
+                        ? '~/.ssh/id_ed25519_gitee'
+                        : '';
+                final ssh = SshTemplateService.instance.build(
+                  provider: provider!,
+                  mode: mode,
+                  identityFile: identityFile,
+                  proxyAddress: proxyController.text.trim(),
+                );
+                setState(() {
+                  _useSsh = true;
+                  _sshconfigController.text = ssh;
+                });
+                Navigator.of(dialogContext).pop();
+                _showMessage(l10n.templateGenerated, Colors.green);
+              },
+              child: Text(l10n.confirm),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 从本软件已有 Profile 深拷贝（规格 5.2）。
+  Future<void> _copyExistingProfile() async {
+    final l10n = AppLocalizations.of(context);
+    final profiles = ConfigService.instance.profiles;
+    if (profiles.isEmpty) {
+      _showMessage(l10n.noProfiles, Colors.orange);
+      return;
+    }
+
+    Profile? selected = profiles.first;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.selectProfileToCopy),
+        content: DropdownButton<Profile>(
+          value: selected,
+          isExpanded: true,
+          items: profiles
+              .map((p) => DropdownMenuItem(value: p, child: Text(p.name)))
+              .toList(),
+          onChanged: (v) => selected = v,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              if (selected != null) {
+                setState(() {
+                  _nameController.text = '${selected!.name}${l10n.copyProfileSuffix}';
+                  _gitconfigController.text = selected!.gitconfig;
+                  _useSsh = selected!.useSsh;
+                  _sshconfigController.text = selected!.sshconfig;
+                });
+              }
+              Navigator.of(context).pop();
+            },
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _importGitConfig() async {
     final l10n = AppLocalizations.of(context);
-    final gitConfigPath = PathService.instance.gitConfigPath;
-    final content = await FileService.instance.readFile(gitConfigPath);
+    final content = await FileService.instance.readFile(
+      PathService.instance.gitConfigPath,
+    );
     if (content != null) {
-      _gitconfigController.text = content;
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.importGitConfigSuccess),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      setState(() => _gitconfigController.text = content);
+      _showMessage(l10n.importGitConfigSuccess, Colors.green);
     } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.importGitConfigFailed),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      _showMessage(l10n.importGitConfigFailed, Colors.red);
     }
   }
 
-  void _pickPrivateKeyFile() async {
+  void _importSshConfig() async {
     final l10n = AppLocalizations.of(context);
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: false,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        _identityFileController.text = result.files.first.path ?? '';
-        if (Platform.isWindows) {
-          _identityFileController.text = _identityFileController.text
-              .replaceAll(r'\', r'\\');
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.pickFileFailed(e.toString()))));
-      }
+    final content = await FileService.instance.readFile(
+      PathService.instance.sshConfigPath,
+    );
+    if (content != null) {
+      setState(() {
+        _useSsh = true;
+        _sshconfigController.text = content;
+      });
+      _showMessage(l10n.importSshConfigSuccess, Colors.green);
+    } else {
+      _showMessage(l10n.importSshConfigFailed, Colors.red);
     }
   }
 
-  void _saveProfile() async {
+  Future<void> _openKeyGen() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => KeyGenPage(
+          onIdentityFileFilled: (line) {
+            if (line != null) {
+              setState(() {
+                _useSsh = true;
+                if (_sshconfigController.text.trim().isEmpty) {
+                  _sshconfigController.text = 'Host github.com\n';
+                }
+                _sshconfigController.text =
+                    '${_sshconfigController.text}\n  $line';
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveProfile() async {
     final l10n = AppLocalizations.of(context);
     if (!_formKey.currentState!.validate()) {
       return;
@@ -281,19 +469,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     setState(() => _isLoading = true);
 
     try {
-      final portText = _sshPortController.text.trim();
-      final sshPort = _useSsh && portText.isNotEmpty
-          ? int.tryParse(portText)
-          : null;
-
       final profile = Profile(
         id: widget.profile?.id,
         name: _nameController.text.trim(),
         gitconfig: _gitconfigController.text,
         useSsh: _useSsh,
-        host: _useSsh ? _hostController.text.trim() : '',
-        identityFile: _useSsh ? _identityFileController.text.trim() : '',
-        sshPort: sshPort,
+        sshconfig: _useSsh ? _sshconfigController.text : '',
       );
 
       final success = widget.profile == null
@@ -301,29 +482,23 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           : await ConfigService.instance.updateProfile(profile);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? l10n.saveSuccess : l10n.saveFailed),
-            backgroundColor: success ? Colors.green : Colors.red,
-          ),
-        );
-
+        _showMessage(success ? l10n.saveSuccess : l10n.saveFailed,
+            success ? Colors.green : Colors.red);
         if (success) {
           Navigator.of(context).pop(true);
         }
       }
     } catch (e) {
-      _showErrorSnackBar(l10n.saveFailedWithError(e.toString()));
+      _showMessage(l10n.saveFailedWithError(e.toString()), Colors.red);
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  void _showErrorSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
-      );
-    }
+  void _showMessage(String message, Color color) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 }

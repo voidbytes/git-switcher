@@ -15,6 +15,8 @@
     * 切换前检查 SSH 配置冲突，并提供确认提示，防止误操作。
     * 校验 SSH 私钥文件的存在性和权限（在 Linux/macOS 下应为 600），确保配置的有效性。
 * **跨平台支持**：兼容 Windows、macOS 和 Linux 操作系统
+* **示例配置（无账号体验）**：首次启动引导页提供“体验示例配置”，一键导入 2 个内置示例配置，无需注册任何账号即可完整体验新建、切换、备份、恢复、查看差异、撤销等全部功能。
+* **命令行工具 (CLI)**：附带与 GUI 功能一致的纯 Dart 命令行工具，支持 `--json` 结构化输出、`--home` 隔离目录、`--lang`、`--log-level`，便于脚本化与自动化测试（详见 `docs/product-tech-spec-v1.0.md` 第 15 章）。
 
 ## 如何使用
 
@@ -46,6 +48,36 @@
     * **Windows**: `%USERPROFILE%\.git_switcher\config.json`
     * **Linux/macOS**: `~/.git_switcher/config.json`
 * **备份文件**：所有的备份文件也存放在 `.git_switcher/backup` 目录下，并按 git 和 ssh 分类。
+* **日志文件**：分级日志按天写入 `~/.git_switcher/logs/git-switcher-YYYY-MM-DD.log`。
+
+## 命令行工具
+
+项目附带纯 Dart 命令行工具 `bin/git_switcher.dart`，与 GUI 功能一致，无需 Flutter 环境即可编译运行。
+
+```bash
+# 构建（需要 Dart SDK）
+./tool/build_cli.sh ./git-switcher
+
+# 查看帮助
+./git-switcher help
+
+# 列出配置（JSON 格式）
+./git-switcher --json list
+
+# 一键切换（使用隔离目录，不碰真实 ~/.gitconfig）
+./git-switcher --home /tmp/test-home switch work
+
+# 撤销上次切换
+./git-switcher undo
+
+# 使用中文输出
+./git-switcher --lang zh list
+
+# 设置日志级别
+./git-switcher --log-level debug list
+```
+
+完整子命令列表见 `docs/product-tech-spec-v1.0.md` 第 15 章。
 
 ## License
 

@@ -450,4 +450,291 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get backupNothing => 'バックアップする設定がありません';
+
+  @override
+  String get sshNoIdentityFile => 'SSH 設定に IdentityFile 行が見つかりません';
+
+  @override
+  String get verifyGitMismatch =>
+      'Git の本人確認に失敗しました：user.name または user.email が対象設定と一致しません';
+
+  @override
+  String verifySshFailed(Object host) {
+    return 'SSH 検証に失敗しました: $host';
+  }
+
+  @override
+  String get undoFailed => '元に戻す操作に失敗しました';
+
+  @override
+  String get importSystemGit => 'システムの .gitconfig をインポート';
+
+  @override
+  String get importSystemSsh => 'システムの .ssh/config をインポート';
+
+  @override
+  String get sshConfigContent => 'SSH 設定の内容';
+
+  @override
+  String get sshConfigHelper => '.ssh/config の内容を貼り付け（ファイル全体の切り替え）';
+
+  @override
+  String get enterSshConfig => 'SSH を有効にする場合は設定内容が必要です';
+
+  @override
+  String get quickCreateTitle => 'クイック作成';
+
+  @override
+  String get fromTemplate => 'テンプレートから';
+
+  @override
+  String get fromExistingProfile => '既存のプロフィールをコピー';
+
+  @override
+  String get generateKeyPair => '鍵ペアを生成';
+
+  @override
+  String get sshPreviewTitle => '~/.ssh/config に書き込む内容';
+
+  @override
+  String get templateProviderTitle => 'プロバイダーを選択';
+
+  @override
+  String get providerGithub => 'GitHub';
+
+  @override
+  String get providerGitlab => 'GitLab';
+
+  @override
+  String get providerGitee => 'Gitee';
+
+  @override
+  String get providerBlank => '空白';
+
+  @override
+  String get templateModeTitle => '接続モード';
+
+  @override
+  String get modeDirect => '直接';
+
+  @override
+  String get modeProxy => 'プロキシ';
+
+  @override
+  String get proxyAddress => 'プロキシアドレス';
+
+  @override
+  String get proxyAddressHint => '空欄の場合はデフォルトの 127.0.0.1:7890 を使用';
+
+  @override
+  String get templateGenerated => 'SSH 設定テンプレートを生成しました';
+
+  @override
+  String get selectProfileToCopy => 'コピーするプロフィールを選択';
+
+  @override
+  String get copyProfileSuffix => '（コピー）';
+
+  @override
+  String get confirm => '確認';
+
+  @override
+  String get importSshConfigSuccess => '現在の .ssh/config 設定をインポートしました';
+
+  @override
+  String get importSshConfigFailed => '.ssh/config が見つからないか、読み取れませんでした';
+
+  @override
+  String get onboardingWelcome => 'Git Switcher へようこそ';
+
+  @override
+  String get onboardingSubtitle => '複数の Git / SSH アイデンティティをワンクリックで管理・切り替え';
+
+  @override
+  String get onboardingNameHint => 'このプロフィールに名前を付けます（例：仕事用アカウント）';
+
+  @override
+  String get onboardingImportDone => '現在のシステム設定をインポートしました。保存前に変更できます';
+
+  @override
+  String get onboardingImport => '現在のシステム設定をインポート';
+
+  @override
+  String get onboardingSkip => 'スキップ';
+
+  @override
+  String get onboardingFinish => '完了';
+
+  @override
+  String get overwriteSshTitle => 'SSH 設定の上書き確認';
+
+  @override
+  String get overwriteSshContent =>
+      'このツールで管理されていない SSH 設定を上書きしようとしています。続行しますか？';
+
+  @override
+  String get switchVerified => '切り替え成功、本人確認済み';
+
+  @override
+  String get switchWrittenNotVerified => '設定は書き込まれましたが、検証に失敗しました';
+
+  @override
+  String get undoSuccess => '前の設定に戻しました';
+
+  @override
+  String get undoNothing => '元に戻す項目がありません';
+
+  @override
+  String get undoLastSwitch => '前回の切り替えを元に戻す';
+
+  @override
+  String get keyManagementTitle => '鍵の管理';
+
+  @override
+  String get keyIdentifier => '識別子（英語）';
+
+  @override
+  String get keyIdentifierHelper => '英字、数字、- 、_ のみ使用可能。ファイル名に使用されます';
+
+  @override
+  String get keyIdentifierInvalid => '識別子は英語、数字、- 、_ のみ使用できます';
+
+  @override
+  String get keyEmail => 'メール（任意）';
+
+  @override
+  String get keyEmailInvalid => 'メール形式が正しくありません。@ を含める必要があります';
+
+  @override
+  String get keyPassphrase => 'パスフレーズ（任意）';
+
+  @override
+  String get keyPassphraseHelper => '空欄でパスフレーズなし；設定した場合は毎回入力が必要です';
+
+  @override
+  String get keyAlgorithmLabel => 'アルゴリズム';
+
+  @override
+  String get generateKey => '鍵ペアを生成';
+
+  @override
+  String get privateKeyPath => '秘密鍵のパス';
+
+  @override
+  String get publicKey => '公開鍵';
+
+  @override
+  String get copyPublicKey => '公開鍵をコピー';
+
+  @override
+  String get fillIdentityFile => '現在の設定に記入';
+
+  @override
+  String get keygenSuccess => '鍵ペアの生成に成功しました';
+
+  @override
+  String keygenFailed(Object message) {
+    return '鍵の生成に失敗しました: $message';
+  }
+
+  @override
+  String get keygenUnavailable =>
+      'ssh-keygen が見つかりません。OpenSSH クライアントをインストールしてください';
+
+  @override
+  String get keyExistsTitle => '鍵は既に存在します';
+
+  @override
+  String keyExistsContent(Object path) {
+    return '鍵は既に存在します：$path\n上書きしますか？';
+  }
+
+  @override
+  String get passphraseReminder => 'パスフレーズが設定されています。毎回入力が必要になります';
+
+  @override
+  String get fillIdentityFileDone => 'IdentityFile 行を記入しました';
+
+  @override
+  String get publicKeyCopied => '公開鍵をクリップボードにコピーしました';
+
+  @override
+  String get keygenDetecting => 'ssh-keygen の利用可否を確認中…';
+
+  @override
+  String keygenDetectedAt(Object path) {
+    return 'ssh-keygen を検出しました：$path';
+  }
+
+  @override
+  String get keygenNotFound =>
+      'ssh-keygen が見つかりません。OpenSSH クライアントをインストールするかパスを指定してください';
+
+  @override
+  String get keygenPathLabel => 'カスタム ssh-keygen パス';
+
+  @override
+  String get keygenPathHint => '空欄で自動検出（PATH / 一般的なインストール場所）';
+
+  @override
+  String get keygenVerifyBtn => '確認';
+
+  @override
+  String get keygenResetBtn => '自動検出に戻す';
+
+  @override
+  String get keygenBrowseBtn => '参照';
+
+  @override
+  String keygenPathValid(Object path) {
+    return '有効な ssh-keygen パス：$path';
+  }
+
+  @override
+  String keygenPathInvalid(Object path) {
+    return '無効な ssh-keygen パス：$path';
+  }
+
+  @override
+  String get logSettings => 'ログ設定';
+
+  @override
+  String get logSettingsSubtitle => 'ログレベルと保存場所';
+
+  @override
+  String get logLevel => 'ログレベル';
+
+  @override
+  String get logLevelTrace => 'TRACE（最も詳細）';
+
+  @override
+  String get logLevelDebug => 'DEBUG（デバッグ）';
+
+  @override
+  String get logLevelInfo => 'INFO（情報，デフォルト）';
+
+  @override
+  String get logLevelWarn => 'WARN（警告）';
+
+  @override
+  String get logLevelError => 'ERROR（エラーのみ）';
+
+  @override
+  String get logFileLocation => 'ログディレクトリ';
+
+  @override
+  String get onboardingDemoButton => 'サンプル設定を試す';
+
+  @override
+  String get onboardingDemoHint =>
+      'アカウント登録は不要 — サンプル設定を 2 つ読み込むだけで全機能をお試しいただけます';
+
+  @override
+  String get onboardingDemoDone => 'サンプル設定を読み込みました。「完了」をクリックして開始';
+
+  @override
+  String get demoProfileWorkName => 'サンプル-仕事用アカウント';
+
+  @override
+  String get demoProfilePersonalName => 'サンプル-個人用アカウント';
 }
