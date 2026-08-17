@@ -170,6 +170,7 @@ class _KeyGenPageState extends State<KeyGenPage> {
       );
 
       if (result['message'] == 'exists') {
+        if (!mounted) return;
         final overwrite = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(

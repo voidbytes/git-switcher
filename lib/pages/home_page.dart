@@ -53,6 +53,7 @@ class _HomePageState extends State<HomePage> {
     try {
       // 覆盖确认：仅 use_ssh 且当前 ~/.ssh/config 非本工具管理时。
       if (profile.useSsh && await _gitService.isUnmanagedSshConfig()) {
+        if (!mounted) return;
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
