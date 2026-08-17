@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:git_switcher/models/backup_item.dart';
 import 'package:git_switcher/services/file_service.dart';
 import 'package:git_switcher/services/path_service.dart';
+import 'package:path/path.dart' as p;
 
 import 'helpers.dart';
 
@@ -118,7 +119,7 @@ void main() {
           .where((f) => f.path.endsWith('.bak'))
           .toList();
       expect(remaining.length, 3);
-      final names = remaining.map((f) => f.path.split('/').last).toList();
+      final names = remaining.map((f) => p.basename(f.path)).toList();
       expect(names, containsAll(['gitconfig.4.bak', 'gitconfig.5.bak', 'gitconfig.6.bak']));
       expect(names, isNot(contains('gitconfig.1.bak')));
     });

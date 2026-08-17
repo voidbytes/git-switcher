@@ -1,3 +1,5 @@
+import 'package:path/path.dart' as p;
+
 import '../services/path_service.dart';
 
 /// SSH 配置轻量提取服务。
@@ -48,7 +50,7 @@ class SshConfigService {
   }
 
   String _resolveIdentityPath(String raw) {
-    if (raw.startsWith('/')) return raw;
+    if (p.isAbsolute(raw)) return raw;
     if (raw.startsWith('~/')) {
       return _pathService.resolvePath(raw);
     }

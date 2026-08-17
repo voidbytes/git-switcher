@@ -1,4 +1,7 @@
 import 'dart:io';
+
+import 'package:path/path.dart' as p;
+
 import '../l10n/core_messages.dart';
 import '../models/backup_item.dart';
 import 'log_service.dart';
@@ -86,7 +89,7 @@ class FileService {
         final gitFiles = await gitBackupDir.list().toList();
         for (final file in gitFiles) {
           if (file is File && file.path.endsWith('.bak')) {
-            final filename = file.path.split('/').last;
+            final filename = p.basename(file.path);
             final parts = filename.split('.');
             if (parts.length >= 3) {
               final timestamp = parts[parts.length - 2];
@@ -109,7 +112,7 @@ class FileService {
         final sshFiles = await sshBackupDir.list().toList();
         for (final file in sshFiles) {
           if (file is File && file.path.endsWith('.bak')) {
-            final filename = file.path.split('/').last;
+            final filename = p.basename(file.path);
             final parts = filename.split('.');
             if (parts.length >= 3) {
               final timestamp = parts[parts.length - 2];
