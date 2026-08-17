@@ -100,6 +100,8 @@ Host github.com
     });
 
     test('SSH 写入失败时回滚已写入的 Git 配置', () async {
+      // Windows 无 Unix 目录只读权限语义，无法模拟写入失败，跳过。
+      if (Platform.isWindows) return;
       await writeHome(home, '.gitconfig', '[user]\n  name = old\n');
       final key = await createKey('.ssh_key');
       final sshDir = Directory('${home.path}/.ssh');
